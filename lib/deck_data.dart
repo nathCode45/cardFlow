@@ -1,10 +1,12 @@
 
 import 'dart:async';
+import 'dart:convert';
 
 
 import 'package:flutter/cupertino.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
+import 'package:zefyrka/zefyrka.dart';
 
 
 class Deck{
@@ -47,6 +49,10 @@ class Flashcard{
   int? deckID;
 
   Flashcard(this.front, this.back, {this.id, this.deckID});
+
+  Flashcard.fromPlainText(String plainFront, String plainBack, {this.id, this.deckID}):
+    front = jsonEncode(NotusDocument().insert(0, '$plainFront\n')),
+    back = jsonEncode(NotusDocument().insert(0, '$plainFront\n'));
 
   Map<String, dynamic> toMap(){
     return{

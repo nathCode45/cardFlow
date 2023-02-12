@@ -210,7 +210,7 @@ class _CardEditState extends State<CardEdit> {
     document.insert(0, "This");
     NotusDocument().insert(0,'This');
     //TODO FOR NEXT TIME, just change database type to JSON for NotusDoc, the above lines are how you insert text into one,
-
+    String mString = jsonEncode(document);
     final contents = jsonEncode(_controller!.document);
     final contents2 = jsonEncode(_controller!.document);
     final file = File(Directory.systemTemp.path + '/front_save.json');

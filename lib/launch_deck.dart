@@ -1,7 +1,10 @@
+import 'dart:convert';
+
 import 'package:card_flow/card_edit_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart';
+import 'package:zefyrka/zefyrka.dart';
 import 'deck_data.dart';
 
 class LaunchDeck extends StatefulWidget {
@@ -87,6 +90,7 @@ class _LaunchDeckState extends State<LaunchDeck> {
         decoration: const BoxDecoration(border: Border(top:BorderSide(width: 1.0, color: Colors.black))),
         child: ListView.builder(itemCount: cards.length,itemBuilder: (context, index){
           if(cards[index]!=null) {
+            String front = NotusDocument.fromJson(jsonDecode(cards[index].front)).toString();//decodes Notus Document stored through JSON in SQL database
             return ListTile(
               contentPadding: const EdgeInsets.symmetric(
                   horizontal: 6, vertical: 18.0),
@@ -94,7 +98,7 @@ class _LaunchDeckState extends State<LaunchDeck> {
                   color: Colors.black12, width: 1)),
               leading: const Image(image: AssetImage(
                   'assets/card_icon.png')),
-              title: Text(cards[index].front),
+              title: Text(front),
             );
           }else{
             return Container();
