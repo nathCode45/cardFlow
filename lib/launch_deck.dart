@@ -17,7 +17,7 @@ class LaunchDeck extends StatefulWidget {
 }
 
 class _LaunchDeckState extends State<LaunchDeck> {
-  late final List<Flashcard> cards;
+  late List<Flashcard> cards;
   bool isLoading = false;
 
   @override
@@ -26,6 +26,8 @@ class _LaunchDeckState extends State<LaunchDeck> {
     super.initState();
     refreshCards();
   }
+
+
 
   Future refreshCards() async{
     setState((){
@@ -48,8 +50,9 @@ class _LaunchDeckState extends State<LaunchDeck> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: (){
-          Navigator.push(context, MaterialPageRoute(builder: (context)=>CardEdit(selectedDeckID: widget.deck.id,)));
+        onPressed: () async{
+          final value = await Navigator.push(context, MaterialPageRoute(builder: (context)=>CardEdit(selectedDeckID: widget.deck.id,)));
+          setState(() {refreshCards();});
         },
         child: Icon(Icons.add),
       ),
@@ -90,7 +93,7 @@ class _LaunchDeckState extends State<LaunchDeck> {
         decoration: const BoxDecoration(border: Border(top:BorderSide(width: 1.0, color: Colors.black))),
         child: ListView.builder(itemCount: cards.length,itemBuilder: (context, index){
           if(cards[index]!=null) {
-            String front = NotusDocument.fromJson(jsonDecode(cards[index].front)).toString();//decodes Notus Document stored through JSON in SQL database
+            String front = _shorten(NotusDocument.fromJson(jsonDecode(cards[index].front)).toPlainText());//decodes Notus Document stored through JSON in SQL database
             return ListTile(
               contentPadding: const EdgeInsets.symmetric(
                   horizontal: 6, vertical: 18.0),
@@ -109,6 +112,19 @@ class _LaunchDeckState extends State<LaunchDeck> {
       return Text("No cards yet");
     }
   }
+
+  String _shorten(String str){
+    const int CHARACTER_LIMIT = 20;
+    String singleLine = str.replaceAll("\n", " ");
+    if (singleLine.length>CHARACTER_LIMIT){
+      return '${singleLine.substring(0, CHARACTER_LIMIT)}...';
+    }else{
+      return singleLine;
+    }
+
+  }
+
+
 }
 
 

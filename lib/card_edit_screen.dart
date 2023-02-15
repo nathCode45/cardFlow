@@ -205,21 +205,20 @@ class _CardEditState extends State<CardEdit> {
     );
   }
 
-  void _saveDocument(BuildContext context) {
-    NotusDocument document = NotusDocument();
-    document.insert(0, "This");
-    NotusDocument().insert(0,'This');
-    //TODO FOR NEXT TIME, just change database type to JSON for NotusDoc, the above lines are how you insert text into one,
-    String mString = jsonEncode(document);
+  void _saveDocument(BuildContext context) async {
     final contents = jsonEncode(_controller!.document);
     final contents2 = jsonEncode(_controller!.document);
-    final file = File(Directory.systemTemp.path + '/front_save.json');
-    final file2 = File(Directory.systemTemp.path + "/back_save.json");
-    file.writeAsString(contents).then((_) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('Saved.')));
-    });
-    file2.writeAsString(contents2);
+    await Data.instance.createFlashcard(Flashcard(contents, contents2, deckID: widget.selectedDeckID));
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text('Saved.')));
+
+    // final file = File(Directory.systemTemp.path + '/front_save.json');
+    // final file2 = File(Directory.systemTemp.path + "/back_save.json");
+    // file.writeAsString(contents).then((_) {
+    //   ScaffoldMessenger.of(context)
+    //       .showSnackBar(SnackBar(content: Text('Saved.')));
+    // });
+    // file2.writeAsString(contents2);
   }
 }
 
