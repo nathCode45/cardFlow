@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:zefyrka/zefyrka.dart';
 import 'deck_data.dart';
+import 'learn.dart';
 
 class LaunchDeck extends StatefulWidget {
   const LaunchDeck({super.key, required this.deck});
@@ -73,7 +74,9 @@ class _LaunchDeckState extends State<LaunchDeck> {
                     ]))),
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 32.0),
-              child: OutlinedButton(onPressed: (){}, child: Text("Start Studying", style: TextStyle(fontFamily: "Lexend"),)),
+              child: OutlinedButton(onPressed: (){
+                Navigator.push(context, MaterialPageRoute(builder: (context) => Learn(deck: widget.deck)));
+              }, child: Text("Start Studying", style: TextStyle(fontFamily: "Lexend"),)),
             ),
             Expanded(
               child: Material(
