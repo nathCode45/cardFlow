@@ -17,8 +17,12 @@ class Learn extends StatefulWidget {
 
 class _LearnState extends State<Learn> {
   late List<Flashcard> cards;
+  bool reveal = false;
   bool isLoading = false;
-  ZefyrController? _controller;
+  late ZefyrController? _controllerFront;
+  late ZefyrController? _controllerBack;
+  double _diffSlider = 0.5;
+
 
   @override
   void initState() {
@@ -42,7 +46,13 @@ class _LearnState extends State<Learn> {
     cards = await widget.deck.getCards();
     _loadDocument(cards[0].front).then((document){
       setState(() {
-        _controller = ZefyrController(document);
+        _controllerFront = ZefyrController(document);
+      });
+    });
+
+    _loadDocument(cards[0].back).then((document){
+      setState(() {
+        _controllerBack = ZefyrController(document);
       });
     });
     setState(() => isLoading = false);
@@ -51,6 +61,9 @@ class _LearnState extends State<Learn> {
 
   @override
   Widget build(BuildContext context) {
+
+    refreshCards();
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -62,7 +75,7 @@ class _LearnState extends State<Learn> {
       body: Center(child:
         Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.start,
           mainAxisSize: MainAxisSize.max,
           children: [
             Padding(
@@ -74,16 +87,33 @@ class _LearnState extends State<Learn> {
                   border: Border.all(color: Colors.black26, width: 2),
                 ),
                 child: Center(
-                  child: (_controller == null) ?
+                  child: (_controllerFront == null) ?
                   const Center(child: CircularProgressIndicator(),)
-                      :ZefyrEditor(controller: _controller!, readOnly: true, padding: const EdgeInsets.all(16),),
+                      : ZefyrEditor(controller: _controllerFront!, readOnly: true, padding: const EdgeInsets.all(16), showCursor: false,),
                 ),
               ),
             ),
+            (reveal) ? Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(15),
+                  color: Colors.white,
+                  border: Border.all(color: Colors.black26, width: 2),
+                ),
+                child: Center(
+                  child: (_controllerBack == null) ?
+                  const Center(child: CircularProgressIndicator(),)
+                      : ZefyrEditor(controller: _controllerBack!, readOnly: true, padding: const EdgeInsets.all(16), showCursor: false,),
+                ),
+              ),
+            ): const SizedBox(height: 5,),
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: TextButton(
-                  onPressed: (){},
+                  onPressed: (){
+                    reveal = !reveal;
+                  },
                   style: ButtonStyle(
                     shape: MaterialStateProperty.all<RoundedRectangleBorder>(
                       RoundedRectangleBorder(
@@ -94,10 +124,16 @@ class _LearnState extends State<Learn> {
                   ),
                   child: const Padding(
                     padding: EdgeInsets.all(16.0),
-                    child: Text("Reveal"),
+                    child: Text("Flip"),
                   ),
               ),
-            )
+            ),
+            (reveal)? Column(
+              children: [
+                Text("How hard was this?"),
+                Slider(value: _diffSlider, min: 0, max: 1, onChanged: (double value) {_diffSlider = value;},),
+              ],
+            ): Container()
           ],
         )
 

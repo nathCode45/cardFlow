@@ -52,7 +52,7 @@ class Flashcard{
 
   Flashcard.fromPlainText(String plainFront, String plainBack, {this.id, this.deckID}):
     front = jsonEncode(NotusDocument().insert(0, '$plainFront\n')),
-    back = jsonEncode(NotusDocument().insert(0, '$plainFront\n'));
+    back = jsonEncode(NotusDocument().insert(0, '$plainBack\n'));
 
   Map<String, dynamic> toMap(){
     return{
