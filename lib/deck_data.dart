@@ -48,11 +48,21 @@ class Flashcard{
   String back;
   int? deckID;
 
-  Flashcard(this.front, this.back, {this.id, this.deckID});
+  double eFactor;
+  int repetitions;
+  DateTime nextReview;
+
+  Flashcard(this.front, this.back, {this.id, this.deckID}):
+    nextReview = DateTime.now(),
+    eFactor = 2.5,
+    repetitions = 0;
 
   Flashcard.fromPlainText(String plainFront, String plainBack, {this.id, this.deckID}):
     front = jsonEncode(NotusDocument().insert(0, '$plainFront\n')),
-    back = jsonEncode(NotusDocument().insert(0, '$plainBack\n'));
+    back = jsonEncode(NotusDocument().insert(0, '$plainBack\n')),
+    nextReview = DateTime.now(),
+    eFactor = 2.5,
+    repetitions = 0;
 
   Map<String, dynamic> toMap(){
     return{
@@ -61,12 +71,35 @@ class Flashcard{
       'front': front,
       'back': back,
     };
+
+    }
+
+
+  void repeat(){
+     repetitions = repetitions+1;
+  }
+
+  Duration reviewInterval(int grade, int gRepetitions){
+    if(gRepetitions<=2 && grade==0) {
+      return Duration(minutes: 1);
+    } else if(gRepetitions == 1 && grade!=0){
+      return Duration(minutes: 5);
+    }else if(gRepetitions ==2 &&grade!=0) {
+      return Duration(minutes: 10);
+    }else{
+      return reviewInterval(grade, gRepetitions-1)*eFactor;
+    }
   }
 
   Flashcard copy({int? id, int? deckID, String? front, String? back}){
     return Flashcard(front?? this.front, back??this.back, id: id?? this.id, deckID: deckID ?? this.deckID);
   }
+
 }
+
+
+
+
 
 // abstract class Decks{
 //   static List<Deck> deckList = [
