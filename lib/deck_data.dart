@@ -7,6 +7,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'package:zefyrka/zefyrka.dart';
+import 'package:intl/intl.dart';
 
 
 class Deck{
@@ -24,7 +25,7 @@ class Deck{
         'id': id,
         'name': name,
         'cards_due' : cardsDue,
-        'date_created' : dateCreated?.toIso8601String(),
+        'date_created' : dateCreated?.toIso8601String()
       };
   }
 
@@ -55,21 +56,26 @@ class Flashcard{
   Flashcard(this.front, this.back, {this.id, this.deckID}):
     nextReview = DateTime.now(),
     eFactor = 2.5,
-    repetitions = 0;
+    repetitions = 1; //repetitions cannot be zero
+  Flashcard.withData(this.front, this.back, {this.id, this.deckID, required this.nextReview, required this.eFactor, required this.repetitions});
 
   Flashcard.fromPlainText(String plainFront, String plainBack, {this.id, this.deckID}):
     front = jsonEncode(NotusDocument().insert(0, '$plainFront\n')),
     back = jsonEncode(NotusDocument().insert(0, '$plainBack\n')),
     nextReview = DateTime.now(),
     eFactor = 2.5,
-    repetitions = 0;
+    repetitions = 1; //repetitions cannot be zero
 
   Map<String, dynamic> toMap(){
+    var formatter = DateFormat('yyyy-MM-dd HH:mm:ss');
     return{
       'id': id,
       'deckID': deckID,
       'front': front,
       'back': back,
+      'formattedRevDate': formatter.format(nextReview),
+      'repetitions': repetitions,
+      'eFactor': eFactor
     };
 
     }
@@ -79,17 +85,31 @@ class Flashcard{
      repetitions = repetitions+1;
   }
 
-  Duration reviewInterval(int grade, int gRepetitions){
+  Duration reviewInterval(double grade, int gRepetitions){
     if(gRepetitions<=2 && grade==0) {
       return Duration(minutes: 1);
     } else if(gRepetitions == 1 && grade!=0){
       return Duration(minutes: 5);
     }else if(gRepetitions ==2 &&grade!=0) {
       return Duration(minutes: 10);
-    }else{
-      return reviewInterval(grade, gRepetitions-1)*eFactor;
+    }else if(grade<3){
+      return reviewInterval(grade, 1);
+    }else {
+      return reviewInterval(grade, gRepetitions-1)*getUpdatedEFactor(grade);
     }
   }
+
+  double getUpdatedEFactor(double grade){
+    double tempEFactor;
+    if(eFactor<1.3){
+      tempEFactor = 1.3;
+    }else{
+      tempEFactor = eFactor + (0.1-(5-grade)*(0.08+(5-grade)*0.02));
+    }
+    return tempEFactor;
+
+  }
+
 
   Flashcard copy({int? id, int? deckID, String? front, String? back}){
     return Flashcard(front?? this.front, back??this.back, id: id?? this.id, deckID: deckID ?? this.deckID);
@@ -146,7 +166,7 @@ class Data{
 
   Future _createDB(Database db, int version) async {
     db.execute('CREATE TABLE decks(id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, cards_due INTEGER NOT NULL, date_created TEXT)');
-    db.execute('CREATE TABLE flashcards(id INTEGER PRIMARY KEY AUTOINCREMENT, deckID INTEGER, front TEXT, back TEXT)');
+    db.execute('CREATE TABLE flashcards(id INTEGER PRIMARY KEY AUTOINCREMENT, deckID INTEGER, front TEXT, back TEXT, formattedRevDate TEXT, repetitions INTEGER, eFactor INTEGER)');
   }
 
 
@@ -189,14 +209,15 @@ class Data{
     final db = await instance.database;
     final List<Map<String, dynamic>> maps;
     if(deckID==null){
-      maps = await db.query('flashcards', columns: ['id','deckID', 'front', 'back']);
+      maps = await db.query('flashcards', columns: ['id','deckID', 'front', 'back', 'repetitions','eFactor', 'formattedRevDate']);
     }else{
-      maps = await db.query('flashcards', columns: ['id', 'deckID', 'front', 'back'], where: 'deckID = ?', whereArgs: [deckID]);
+      maps = await db.query('flashcards', columns: ['id', 'deckID', 'front', 'back', 'repetitions', 'eFactor', 'formattedRevDate'], where: 'deckID = ?', whereArgs: [deckID]);
     }
 
 
     if(maps.isNotEmpty){
-      return List.generate(maps.length, (int i) => Flashcard(maps[i]['front'], maps[i]['back'], id: maps[i]['id'], deckID: maps[i]['deckID']));
+      return List.generate(maps.length, (int i) => Flashcard.withData(maps[i]['front'], maps[i]['back'], id: maps[i]['id'],
+          deckID: maps[i]['deckID'], nextReview: DateFormat('yyyy-MM-dd HH:mm:ss').parse(maps[i]['formattedRevDate']), eFactor: maps[i]['eFactor'], repetitions: maps[i]['repetitions']));
     }else{
       throw Exception('no cards were found');
     }
@@ -224,7 +245,8 @@ class Data{
     final List<Map<String, dynamic>> maps = await db.query('cards', where: 'id = ?', whereArgs: [id]);
 
     if(maps.isNotEmpty){
-      return Flashcard(maps[id]['front'], maps[id]['back'], id: maps[id]['id'], deckID: maps[id]['deckID']);
+      return Flashcard.withData(maps[id]['front'], maps[id]['back'], id: maps[id]['id'], deckID: maps[id]['deckID'],
+          nextReview: maps[id]['formattedRevDate'], eFactor: maps[id]['eFactor'], repetitions: maps[id]['repetitions']);
     }else{
       throw Exception('ID $id is not found');
     }

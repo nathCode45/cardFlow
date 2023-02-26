@@ -12,6 +12,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   Data.instance.deleteDatabase();
   await Data.instance.deleteAllDecks();
+  await Data.instance.deleteAllFlashcards();
   print(await Data.instance.createDeck(Deck(name: "AP Calculus", cardsDue: 13, dateCreated: DateTime.now())));
 
   Deck southAmerica = await Data.instance.createDeck(Deck(name: "South American Capitals", cardsDue: 3, dateCreated: DateTime.now()));

@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:zefyrka/zefyrka.dart';
+import 'custom_widgets/slider_widget.dart';
 
 import 'deck_data.dart';
 
@@ -19,9 +20,11 @@ class _LearnState extends State<Learn> {
   late List<Flashcard> cards;
   bool reveal = false;
   bool isLoading = false;
-  late ZefyrController? _controllerFront;
-  late ZefyrController? _controllerBack;
-  double _diffSlider = 0.5;
+  late ZefyrController? _controllerFront = ZefyrController();
+  late ZefyrController? _controllerBack = ZefyrController();
+  double _diffFactor = 1;
+  double _slideFactor = 0.5;
+  int _correctIndex = 0;
 
 
   @override
@@ -49,20 +52,23 @@ class _LearnState extends State<Learn> {
         _controllerFront = ZefyrController(document);
       });
     });
-
-    _loadDocument(cards[0].back).then((document){
-      setState(() {
-        _controllerBack = ZefyrController(document);
-      });
-    });
     setState(() => isLoading = false);
-
   }
+
+
+
+  // String _getDifficultyLabel(int difficulty){
+  //   switch(difficulty){
+  //     case 0:
+  //       return ""
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {
 
-    refreshCards();
+
+
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -112,7 +118,20 @@ class _LearnState extends State<Learn> {
               padding: const EdgeInsets.all(8.0),
               child: TextButton(
                   onPressed: (){
-                    reveal = !reveal;
+                    setState((){
+                      reveal = !reveal;
+                    });
+                    if(reveal) {
+                      setState(() {
+                        isLoading = true;
+                      });
+                      _loadDocument(cards[0].back).then((document) {
+                        setState(() {
+                          _controllerBack = ZefyrController(document);
+                        });
+                      });
+                      setState(() => isLoading = false);
+                    }
                   },
                   style: ButtonStyle(
                     shape: MaterialStateProperty.all<RoundedRectangleBorder>(
@@ -130,10 +149,71 @@ class _LearnState extends State<Learn> {
             ),
             (reveal)? Column(
               children: [
-                Text("How hard was this?"),
-                Slider(value: _diffSlider, min: 0, max: 1, onChanged: (double value) {_diffSlider = value;},),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(8, 24, 8, 8),
+                  child: CupertinoSlidingSegmentedControl(
+                      groupValue: _correctIndex,
+                      children: const {0: Text("I got it wrong"), 1: Text("I got it right")},
+                      thumbColor: (_correctIndex==0)?Colors.redAccent:Colors.greenAccent,
+                      backgroundColor: (_correctIndex==0)?Colors.red:Colors.green,
+                      padding: EdgeInsets.all(8),
+                      onValueChanged: (i){
+                        setState((){
+                          _correctIndex = i!;
+                          _diffFactor = _correctIndex*3+_slideFactor;
+                        });
+                      }
+                  ),
+                ),
+                const Padding(
+                  padding: EdgeInsets.fromLTRB(8, 16, 8, 8),
+                  child: Text("How easy was this?"),
+                ),
+                SliderWidget(),
+                // Container(
+                //   decoration: const BoxDecoration(
+                //     gradient: LinearGradient(colors: [Color.fromARGB(255, 29, 221, 163), Colors.green])
+                //   ),
+                //   child: Slider(
+                //     value: _slideFactor,
+                //     min: 0,
+                //     max: 2,
+                //     onChanged: (double value) {
+                //       setState(() {
+                //         _slideFactor = value;
+                //         _diffFactor = _correctIndex*3+_slideFactor;
+                //       });
+                //       },
+                //     divisions: 6,
+                //     label: "Next repetition: ${cards[0].reviewInterval(_diffFactor, cards[0].repetitions).inMinutes} minutes",
+                //   ),
+                // ),
+                /*TODO left off with this idea: make grading scale not non-discrete (doubles not just 0-5)
+                   there will be two factors influencing the grading: time to answer and difficulty rating
+                   time to answer will have the greatest impact on grading but difficulty rating will also have a 35% effect or sum like that
+                   This approach makes sense because some cards may have a long prompt at the front but they are still easy for the user to
+                   guess, so looking at the time to guess alone would be misleading, therefore it will take both time and diff rating into account
+                */
+                /*
+                  updated TODO i think we should actually go for the one slider approach instead with a red wrong section and a green right section
+                  use this: https://medium.com/flutter-community/flutter-sliders-demystified-4b3ea65879c to help make it
+                 */
               ],
-            ): Container()
+
+            ): Container(),
+
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: ElevatedButton(onPressed: ((){
+                setState(() {
+                  cards[0].repeat();
+                  if(_diffFactor>=3) {
+                    cards[0].eFactor = cards[0].getUpdatedEFactor(_diffFactor);
+                  }
+                });
+
+              }), child: Icon(Icons.arrow_forward_ios_sharp)),
+            )
           ],
         )
 
