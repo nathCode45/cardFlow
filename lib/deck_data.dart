@@ -55,7 +55,7 @@ class Flashcard{
 
   Flashcard(this.front, this.back, {this.id, this.deckID}):
     nextReview = DateTime.now(),
-    eFactor = 2.5,
+    eFactor = 1.2,//2.5,
     repetitions = 1; //repetitions cannot be zero
   Flashcard.withData(this.front, this.back, {this.id, this.deckID, required this.nextReview, required this.eFactor, required this.repetitions});
 
@@ -63,7 +63,7 @@ class Flashcard{
     front = jsonEncode(NotusDocument().insert(0, '$plainFront\n')),
     back = jsonEncode(NotusDocument().insert(0, '$plainBack\n')),
     nextReview = DateTime.now(),
-    eFactor = 2.5,
+    eFactor = 1.2,//2.5,
     repetitions = 1; //repetitions cannot be zero
 
   Map<String, dynamic> toMap(){
@@ -95,19 +95,31 @@ class Flashcard{
     }else if(grade<3){
       return reviewInterval(grade, 1);
     }else {
-      return reviewInterval(grade, gRepetitions-1)*getUpdatedEFactor(grade);
+      print("recurred");
+      return reviewInterval(grade, gRepetitions-1)*getUpdatedEFactor(grade); ///this recursion is what is causing the eFactor to be so large
+
     }
   }
 
   double getUpdatedEFactor(double grade){
     double tempEFactor;
-    if(eFactor<1.3){
-      tempEFactor = 1.3;
+    if(eFactor<0.3){
+      tempEFactor = 0.3;
     }else{
       tempEFactor = eFactor + (0.1-(5-grade)*(0.08+(5-grade)*0.02));
+      print("eFactor = eFactor + ${(0.1-(5-grade)*(0.08+(5-grade)*0.02))} = $eFactor");
+
     }
     return tempEFactor;
 
+  }
+
+  void updateRepetitions(double grade){
+    if(grade<3 && repetitions > 3){
+      repetitions = repetitions-2;
+    }else{
+      repeat();
+    }
   }
 
 

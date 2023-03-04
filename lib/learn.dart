@@ -149,27 +149,16 @@ class _LearnState extends State<Learn> {
             ),
             (reveal)? Column(
               children: [
+                // const Padding(
+                //   padding: EdgeInsets.fromLTRB(8, 16, 8, 8),
+                //   child: Text("Difficulty", style: TextStyle(
+                //     fontSize: 24
+                //   ),),
+                // ),
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(8, 24, 8, 8),
-                  child: CupertinoSlidingSegmentedControl(
-                      groupValue: _correctIndex,
-                      children: const {0: Text("I got it wrong"), 1: Text("I got it right")},
-                      thumbColor: (_correctIndex==0)?Colors.redAccent:Colors.greenAccent,
-                      backgroundColor: (_correctIndex==0)?Colors.red:Colors.green,
-                      padding: EdgeInsets.all(8),
-                      onValueChanged: (i){
-                        setState((){
-                          _correctIndex = i!;
-                          _diffFactor = _correctIndex*3+_slideFactor;
-                        });
-                      }
-                  ),
+                  padding: const EdgeInsets.fromLTRB(16,8,16,8),
+                  child: SliderWidget(card: cards[0], onSliderChanged: (double value){_diffFactor = value;}),
                 ),
-                const Padding(
-                  padding: EdgeInsets.fromLTRB(8, 16, 8, 8),
-                  child: Text("How easy was this?"),
-                ),
-                SliderWidget(),
                 // Container(
                 //   decoration: const BoxDecoration(
                 //     gradient: LinearGradient(colors: [Color.fromARGB(255, 29, 221, 163), Colors.green])
@@ -206,9 +195,10 @@ class _LearnState extends State<Learn> {
               padding: const EdgeInsets.all(8.0),
               child: ElevatedButton(onPressed: ((){
                 setState(() {
-                  cards[0].repeat();
+                  cards[0].updateRepetitions(_diffFactor);
                   if(_diffFactor>=3) {
                     cards[0].eFactor = cards[0].getUpdatedEFactor(_diffFactor);
+                    print("Updated eFactor: ${cards[0].getUpdatedEFactor(_diffFactor)}");
                   }
                 });
 

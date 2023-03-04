@@ -10,6 +10,9 @@ import 'deck_data.dart';
 void main() async {
 
   WidgetsFlutterBinding.ensureInitialized();
+
+
+
   Data.instance.deleteDatabase();
   await Data.instance.deleteAllDecks();
   await Data.instance.deleteAllFlashcards();

@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:camera/camera.dart';
 import 'package:card_flow/card_edit_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -37,6 +38,12 @@ class _LaunchDeckState extends State<LaunchDeck> {
     cards = await widget.deck.getCards();
 
     setState(() => isLoading = false);
+  }
+
+  void launchCardCameraScreen() async{
+    final cameras = await availableCameras();
+
+    final firstCamera = cameras.first;
   }
 
 
