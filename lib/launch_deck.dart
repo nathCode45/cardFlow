@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:camera/camera.dart';
 import 'package:card_flow/card_edit_screen.dart';
+import 'package:card_flow/image_to_fcard.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart';
@@ -40,11 +41,7 @@ class _LaunchDeckState extends State<LaunchDeck> {
     setState(() => isLoading = false);
   }
 
-  void launchCardCameraScreen() async{
-    final cameras = await availableCameras();
 
-    final firstCamera = cameras.first;
-  }
 
 
   @override
@@ -57,12 +54,30 @@ class _LaunchDeckState extends State<LaunchDeck> {
           style: const TextStyle(fontFamily: 'Lexend'),
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () async{
-          final value = await Navigator.push(context, MaterialPageRoute(builder: (context)=>CardEdit(selectedDeckID: widget.deck.id,)));
-          setState(() {refreshCards();});
-        },
-        child: Icon(Icons.add),
+      floatingActionButton: Wrap(
+        direction: Axis.vertical,
+        children: [
+          FloatingActionButton(
+          onPressed: () async{
+            if(!mounted) return;
+            final value = await Navigator.push(context, MaterialPageRoute(builder: (context)=>CardEdit(selectedDeckID: widget.deck.id,)));
+            setState(() {refreshCards();});
+          },
+          child: Icon(Icons.add),
+        ),
+          const SizedBox(height: 8),
+
+          FloatingActionButton(
+            onPressed: () async{
+              final cameras = await availableCameras();
+
+              final firstCamera = cameras.first;
+              if(!mounted) return;
+              Navigator.push(context, MaterialPageRoute(builder: (context)=>ImageCardScreen(camera: firstCamera)));
+            },
+            child: Icon(Icons.camera),
+          )
+        ]
       ),
       body: Center(
         child: Column(

@@ -5,6 +5,8 @@
     <key>NSCameraUsageDescription</key>
     <string>The Camera is needed so that the user can take photos of their notes and then use the masking tool to convert the image into flashcards</string>
 
+    <key>NSMicrophoneUsageDescription</key>
+    <string>Need microphone access so that the user can record audio during flashcard creation</string>
 
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>

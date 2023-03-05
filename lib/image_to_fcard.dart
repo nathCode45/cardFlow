@@ -22,7 +22,7 @@ class _ImageCardScreenState extends State<ImageCardScreen> {
     // TODO: implement initState
     super.initState();
 
-    _controller = CameraController(widget.camera, ResolutionPreset.medium);
+    _controller = CameraController(widget.camera, ResolutionPreset.medium, imageFormatGroup: ImageFormatGroup.yuv420);
 
     _initializeControllerFuture = _controller.initialize();
   }
@@ -39,37 +39,58 @@ class _ImageCardScreenState extends State<ImageCardScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(),
-      body: FutureBuilder<void>(
-        future: _initializeControllerFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.done) {
-            return CameraPreview(_controller);
-          } else {
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
-          }
-        },
-      ),
-      floatingActionButton: FloatingActionButton(
-        child: const Icon(Icons.camera_alt),
-        onPressed: () async {
-          try {
-            await _initializeControllerFuture;
+      backgroundColor: Colors.black12,
+      appBar: AppBar(backgroundColor: Colors.black12,),
+      body: Column(
+        children: [
+          FutureBuilder<void>(
+            future: _initializeControllerFuture,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.done) {
+                return CameraPreview(_controller);
+              } else {
+                return const Center(
+                  child: CircularProgressIndicator(),
+                );
+              }
+            },
+          ),
+          Expanded(
+            child: Center(
+              child: ElevatedButton(
+                onPressed: () async {
+                  try {
+                    await _initializeControllerFuture;
 
-            final image = await _controller.takePicture();
+                    final image = await _controller.takePicture();
 
-            if (!mounted) return;
-            await Navigator.of(context).push(MaterialPageRoute(
-                builder: (context) => MaskImageScreen(
-                      imagePath: image.path,
-                    )));
-          } catch (e) {
-            print(e);
-          }
-        },
+                    if (!mounted) return;
+                    await Navigator.of(context).push(MaterialPageRoute(
+                        builder: (context) => MaskImageScreen(
+                          imagePath: image.path,
+                        )));
+                  } catch (e) {
+                    print(e);
+                  }
+                  },
+                  style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      shape: const CircleBorder()
+              ),
+                  child: const Padding(
+                    padding: EdgeInsets.all(16.0),
+                    child: Icon(
+                      size: 32 ,
+                      Icons.camera_alt,
+                      color: Colors.black,
+                    ),
+                  ),
+              ),
+            )
+          )
+        ],
       ),
+
     );
   }
 }
