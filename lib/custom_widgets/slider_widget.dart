@@ -21,6 +21,21 @@ class SliderWidget extends StatefulWidget {
 
   @override
   _SliderWidgetState createState() => _SliderWidgetState();
+
+  String formattedTime(Duration t){
+    if(t.inMinutes<120){
+      return "${t.inMinutes} minutes";
+    }else if(t.inHours<24){
+      return "${t.inHours} hour${(t.inHours>1)?"s":""}";
+    }else if(t.inDays<7){
+      return "${t.inDays} day${(t.inDays>1)?"s":""}";
+    }else if(t.inDays<365){
+      return "${t.inDays~/7} week${((t.inDays~/7)>1)?"s":""}";
+    }else{
+      return "${t.inDays~/365} year${((t.inDays~/365)>1)?"s":""}";
+    }
+  }
+
 }
 
 class _SliderWidgetState extends State<SliderWidget> {
@@ -102,7 +117,7 @@ class _SliderWidgetState extends State<SliderWidget> {
                       max: 6,
                       value: _slideFactor,
                       divisions: 5,
-                      label: "Next repetition: ${widget.card.reviewInterval(_slideFactor, widget.card.repetitions).inMinutes} minutes",
+                      label: "Next repetition: ${widget.formattedTime(widget.card.reviewInterval(_slideFactor, widget.card.repetitions))}",
                       onChanged: (double value) {
                         setState(() {
                           _slideFactor = value;

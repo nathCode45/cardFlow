@@ -1,6 +1,7 @@
 
 import 'dart:async';
 import 'dart:convert';
+import 'dart:math';
 
 
 import 'package:flutter/cupertino.dart';
@@ -53,9 +54,11 @@ class Flashcard{
   int repetitions;
   DateTime nextReview;
 
+  static const double INITIAL_EFACTOR = 2.5;
+
   Flashcard(this.front, this.back, {this.id, this.deckID}):
     nextReview = DateTime.now(),
-    eFactor = 1.2,//2.5,
+    eFactor = INITIAL_EFACTOR,//2.5,
     repetitions = 1; //repetitions cannot be zero
   Flashcard.withData(this.front, this.back, {this.id, this.deckID, required this.nextReview, required this.eFactor, required this.repetitions});
 
@@ -63,7 +66,7 @@ class Flashcard{
     front = jsonEncode(NotusDocument().insert(0, '$plainFront\n')),
     back = jsonEncode(NotusDocument().insert(0, '$plainBack\n')),
     nextReview = DateTime.now(),
-    eFactor = 1.2,//2.5,
+    eFactor = INITIAL_EFACTOR,//2.5,
     repetitions = 1; //repetitions cannot be zero
 
   Map<String, dynamic> toMap(){
@@ -94,8 +97,10 @@ class Flashcard{
       return Duration(minutes: 10);
     }else if(grade<3){
       return reviewInterval(grade, 1);
-    }else {
-      print("recurred");
+    }else if(gRepetitions ==5){
+      return(Duration(hours: 18));
+    } else {
+      print("recurred, eFactor: ${getUpdatedEFactor(grade)}, repetitions: $repetitions, last review interval ${reviewInterval(grade, gRepetitions-1)} ");
       return reviewInterval(grade, gRepetitions-1)*getUpdatedEFactor(grade); ///this recursion is what is causing the eFactor to be so large
 
     }
@@ -106,8 +111,9 @@ class Flashcard{
     if(eFactor<0.3){
       tempEFactor = 0.3;
     }else{
-      tempEFactor = eFactor + (0.1-(5-grade)*(0.08+(5-grade)*0.02));
-      print("eFactor = eFactor + ${(0.1-(5-grade)*(0.08+(5-grade)*0.02))} = $eFactor");
+      var eMultiplier = 0.9; ///initially 0.02
+      tempEFactor = (1/15)*pow(grade-3,3)+1;///(0.1-(5-grade)*((0.1-eMultiplier)+(5-grade)*eMultiplier));///eFactor + (grade-3)*0.5;
+      //print("eFactor = eFactor + ${(0.1-(5-grade)*(0.08+(5-grade)*0.02))} = $eFactor");
 
     }
     return tempEFactor;
