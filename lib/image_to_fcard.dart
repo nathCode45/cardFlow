@@ -69,7 +69,7 @@ class _ImageCardScreenState extends State<ImageCardScreen> {
                     final image = await _controller.takePicture();
 
                     if (!mounted) return;
-                    await Navigator.of(context).push(MaterialPageRoute(
+                    await Navigator.of(context).pushReplacement(MaterialPageRoute(
                         builder: (context) => DispAndMaskScreen(
                           baseImagePath: image.path,
                         )));

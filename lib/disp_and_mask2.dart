@@ -6,8 +6,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-//import 'package:image_painter/image_painter.dart';
-import 'package:card_flow/flutter_image_painter_fork/lib/image_painter.dart';
+import 'package:image_painter/image_painter.dart';
+//import 'package:card_flow/flutter_image_painter_fork/lib/image_painter.dart'; //TODO this package should be deleted entirely from your project eventually because it gets it from github instead
 
 import 'package:path_provider/path_provider.dart';
 
@@ -59,19 +59,29 @@ class _DispAndMaskState extends State<DispAndMaskScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       key: _key,
-      body: Center(child: ImagePainter.asset(
-        widget.baseImagePath,
-        key: _imageKey,
-        height: 800, //TODO make this a size that will work for every screen
-        width: double.infinity,
-        brushIcon: const Icon(Icons.brush_outlined),
-        undoIcon: const Icon(Icons.undo),
-        clearAllIcon: const Icon(Icons.clear_all_sharp),
-        initialPaintMode: PaintMode.freeStyle,
-        initialStrokeWidth: 30,
-        initialColor: Colors.blueAccent,
+      appBar: AppBar(leading: IconButton(icon: const Icon(Icons.arrow_back_ios_new), onPressed: ()=>Navigator.pop(context),),), //TODO make this so that
+      //Todo ...it warns if not saved
+      body: Center(
+        child: Column(
+          children: [
+            Expanded(
+              child: ImagePainter.asset(
+                widget.baseImagePath,
+                scalable: true,
+                key: _imageKey,
+                // height: 200, //TODO make this a size that will work for every screen
+                // width: 200,
+                brushIcon: const Icon(Icons.brush_outlined),
+                undoIcon: const Icon(Icons.undo),
+                clearAllIcon: const Icon(Icons.clear_all_sharp),
+                initialPaintMode: PaintMode.freeStyle,
+                initialStrokeWidth: 30,
+                initialColor: Colors.blueAccent,
 
 
+          ),
+            ),
+        ],
       )),
     );
   }

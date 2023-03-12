@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:card_flow/launch_deck.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
@@ -30,7 +31,17 @@ void main() async {
 
   await Data.instance.createDeck(Deck(name: "Trigonometry Identities", cardsDue: 8, dateCreated: DateTime.now()));
 
-  runApp(const MaterialApp(home: HomeScreen()));
+  runApp(const MaterialApp(
+      home: HomeScreen(),
+      // initialRoute: '/',
+      // routes: {
+      //   // When navigating to the "/" route, build the FirstScreen widget.
+      //   '/': (context) => const HomeScreen(),
+      //   //'/launch_deck': (context) => const LaunchDeck(deck: decks,)),
+      // }
+  ),
+    
+  );
 
 
 
