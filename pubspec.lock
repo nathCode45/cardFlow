@@ -149,6 +149,15 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  image_painter:
+    dependency: "direct main"
+    description:
+      path: "."
+      ref: HEAD
+      resolved-ref: "3261be15e231eb1cbce4a5ed83d3df2a874180c2"
+      url: "https://github.com/nathCode45/flutter_image_painter_fork"
+    source: git
+    version: "0.5.0"
   intl:
     dependency: "direct main"
     description:

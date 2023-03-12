@@ -43,6 +43,9 @@ dependencies:
   intl: ^0.18.0
   camera: ^0.10.3+2
   path_provider: ^2.0.13
+  image_painter:
+    git:
+      url: https://github.com/nathCode45/flutter_image_painter_fork
 
 dev_dependencies:
   flutter_test:

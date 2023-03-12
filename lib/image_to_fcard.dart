@@ -1,4 +1,8 @@
+import 'dart:convert';
+
+import 'dart:io' as Io;
 import 'package:camera/camera.dart';
+import 'package:card_flow/disp_and_mask2.dart';
 import 'package:card_flow/display_and_mask.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -66,8 +70,8 @@ class _ImageCardScreenState extends State<ImageCardScreen> {
 
                     if (!mounted) return;
                     await Navigator.of(context).push(MaterialPageRoute(
-                        builder: (context) => MaskImageScreen(
-                          imagePath: image.path,
+                        builder: (context) => DispAndMaskScreen(
+                          baseImagePath: image.path,
                         )));
                   } catch (e) {
                     print(e);
