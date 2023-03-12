@@ -70,8 +70,8 @@ class _DispAndMaskState extends State<DispAndMaskScreen> {
                 widget.baseImagePath,
                 scalable: true,
                 key: _imageKey,
-                // height: 200, //TODO make this a size that will work for every screen
-                // width: 200,
+                // height: 500, //TODO make this a size that will work for every screen
+                // width: ,
                 brushIcon: const Icon(Icons.brush_outlined),
                 undoIcon: const Icon(Icons.undo),
                 clearAllIcon: const Icon(Icons.clear_all_sharp),
