@@ -64,14 +64,15 @@ class _DispAndMaskState extends State<DispAndMaskScreen> {
       body: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.start,
           children: [
             Expanded(
               child: ImagePainter.asset(
                 widget.baseImagePath,
                 scalable: true,
                 key: _imageKey,
-                // height: 500, //TODO make this a size that will work for every screen
-                // width: ,
+                //height: 500, //TODO make this a size that will work for every screen
+                //width: MediaQuery.of(context).size.width,
                 brushIcon: const Icon(Icons.brush_outlined),
                 undoIcon: const Icon(Icons.undo),
                 clearAllIcon: const Icon(Icons.clear_all_sharp),
