@@ -6,8 +6,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import 'package:image_painter/image_painter.dart';
-//import 'package:card_flow/flutter_image_painter_fork/lib/image_painter.dart';
+//import 'package:image_painter/image_painter.dart';
+import 'package:card_flow/flutter_image_painter_fork/lib/image_painter.dart';
 
 import 'package:path_provider/path_provider.dart';
 
