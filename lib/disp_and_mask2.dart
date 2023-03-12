@@ -63,6 +63,7 @@ class _DispAndMaskState extends State<DispAndMaskScreen> {
       //Todo ...it warns if not saved
       body: Center(
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
             Expanded(
               child: ImagePainter.asset(
@@ -81,6 +82,7 @@ class _DispAndMaskState extends State<DispAndMaskScreen> {
 
           ),
             ),
+            TextButton(child: Text("Save"), onPressed: (){},)
         ],
       )),
     );
