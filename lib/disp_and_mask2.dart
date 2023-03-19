@@ -67,7 +67,7 @@ class _DispAndMaskState extends State<DispAndMaskScreen> {
           Expanded(
             flex: 2,
             child: SizedBox(
-              width: MediaQuery.of(context).size.width,
+              width: double.infinity,
               child: ImagePainter.asset(
                 widget.baseImagePath,
                 controlsAtTop: true,
