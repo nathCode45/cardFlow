@@ -62,34 +62,35 @@ class _DispAndMaskState extends State<DispAndMaskScreen> {
       appBar: AppBar(leading: IconButton(icon: const Icon(Icons.arrow_back_ios_new), onPressed: ()=>Navigator.pop(context),),), //TODO make this so that
       //Todo ...it warns if not saved
       body: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            const Expanded(child: SizedBox()),
-            Expanded(
-              child: ImagePainter.asset(
-                widget.baseImagePath,
-                controlsAtTop: true,
-                scalable: true,
-                key: _imageKey,
-                //height: 500, //TODO make this a size that will work for every screen
-                width: MediaQuery.of(context).size.width,
-                brushIcon: const Icon(Icons.brush_outlined),
-                undoIcon: const Icon(Icons.undo),
-                clearAllIcon: const Icon(Icons.clear_all_sharp),
-                initialPaintMode: PaintMode.freeStyle,
-                initialStrokeWidth: 30,
-                initialColor: Colors.blueAccent,
+        child:ImagePainter.asset(
+          widget.baseImagePath,
+          controlsAtTop: true,
+          scalable: true,
+          key: _imageKey,
+          //height: 500, //TODO make this a size that will work for every screen
+          width: MediaQuery.of(context).size.width,
+          brushIcon: const Icon(Icons.brush_outlined),
+          undoIcon: const Icon(Icons.undo),
+          clearAllIcon: const Icon(Icons.clear_all_sharp),
+          initialPaintMode: PaintMode.freeStyle,
+          initialStrokeWidth: 30,
+          initialColor: Colors.blueAccent,
 
 
-          ),
-            ),
-            const Expanded(child: SizedBox()),
-            TextButton(child: Text("Save"), onPressed: (){},),
-            const Expanded(child: SizedBox()),
-        ],
-      )),
+        ),
+
+      //   Column(
+      //     mainAxisSize: MainAxisSize.min,
+      //     mainAxisAlignment: MainAxisAlignment.start,
+      //     children: [
+      //       Expanded(
+      //         child:
+      //       ),
+      //       const Expanded(child: SizedBox()),
+      //       TextButton(child: Text("Save"), onPressed: (){},),
+      //   ],
+      // )
+      ),
     );
   }
 }
