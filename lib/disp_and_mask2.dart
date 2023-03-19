@@ -65,7 +65,7 @@ class _DispAndMaskState extends State<DispAndMaskScreen> {
         mainAxisSize: MainAxisSize.min,
         children: [
           Expanded(
-            flex: 2,
+            flex: 4,
             child: ImagePainter.asset(
               widget.baseImagePath,
               controlsAtTop: true,
