@@ -65,6 +65,7 @@ class _DispAndMaskState extends State<DispAndMaskScreen> {
         mainAxisSize: MainAxisSize.min,
         children: [
           Expanded(
+            flex: 2,
             child: ImagePainter.asset(
               widget.baseImagePath,
               controlsAtTop: true,
@@ -82,7 +83,8 @@ class _DispAndMaskState extends State<DispAndMaskScreen> {
 
             ),
           ),
-          TextButton(onPressed: (){}, child: Text("Save"))
+          Expanded( flex: 1,
+              child: TextButton(onPressed: (){}, child: Text("Save")))
         ],
       ),
     );
