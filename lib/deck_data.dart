@@ -49,6 +49,7 @@ class Flashcard{
   String front;
   String back;
   int? deckID;
+  bool? isImage = false;
 
   double eFactor;
   int repetitions;
@@ -56,13 +57,13 @@ class Flashcard{
 
   static const double INITIAL_EFACTOR = 2.5;
 
-  Flashcard(this.front, this.back, {this.id, this.deckID}):
+  Flashcard(this.front, this.back, {this.id, this.deckID, this.isImage}):
     nextReview = DateTime.now(),
     eFactor = INITIAL_EFACTOR,//2.5,
     repetitions = 1; //repetitions cannot be zero
-  Flashcard.withData(this.front, this.back, {this.id, this.deckID, required this.nextReview, required this.eFactor, required this.repetitions});
+  Flashcard.withData(this.front, this.back, {this.id, this.deckID, required this.nextReview, required this.eFactor, required this.repetitions, this.isImage});
 
-  Flashcard.fromPlainText(String plainFront, String plainBack, {this.id, this.deckID}):
+  Flashcard.fromPlainText(String plainFront, String plainBack, {this.id, this.deckID, this.isImage}):
     front = jsonEncode(NotusDocument().insert(0, '$plainFront\n')),
     back = jsonEncode(NotusDocument().insert(0, '$plainBack\n')),
     nextReview = DateTime.now(),
@@ -78,7 +79,8 @@ class Flashcard{
       'back': back,
       'formattedRevDate': formatter.format(nextReview),
       'repetitions': repetitions,
-      'eFactor': eFactor
+      'eFactor': eFactor,
+      'isImage': (isImage!=null && isImage==true)? 1:0
     };
 
     }
@@ -184,7 +186,7 @@ class Data{
 
   Future _createDB(Database db, int version) async {
     db.execute('CREATE TABLE decks(id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, cards_due INTEGER NOT NULL, date_created TEXT)');
-    db.execute('CREATE TABLE flashcards(id INTEGER PRIMARY KEY AUTOINCREMENT, deckID INTEGER, front TEXT, back TEXT, formattedRevDate TEXT, repetitions INTEGER, eFactor INTEGER)');
+    db.execute('CREATE TABLE flashcards(id INTEGER PRIMARY KEY AUTOINCREMENT, deckID INTEGER, front TEXT, back TEXT, formattedRevDate TEXT, repetitions INTEGER, eFactor INTEGER, isImage BIT)');
   }
 
 
@@ -227,15 +229,16 @@ class Data{
     final db = await instance.database;
     final List<Map<String, dynamic>> maps;
     if(deckID==null){
-      maps = await db.query('flashcards', columns: ['id','deckID', 'front', 'back', 'repetitions','eFactor', 'formattedRevDate']);
+      maps = await db.query('flashcards', columns: ['id','deckID', 'front', 'back', 'repetitions','eFactor', 'formattedRevDate', 'isImage']);
     }else{
-      maps = await db.query('flashcards', columns: ['id', 'deckID', 'front', 'back', 'repetitions', 'eFactor', 'formattedRevDate'], where: 'deckID = ?', whereArgs: [deckID]);
+      maps = await db.query('flashcards', columns: ['id', 'deckID', 'front', 'back', 'repetitions', 'eFactor', 'formattedRevDate', 'isImage'], where: 'deckID = ?', whereArgs: [deckID]);
     }
 
 
     if(maps.isNotEmpty){
       return List.generate(maps.length, (int i) => Flashcard.withData(maps[i]['front'], maps[i]['back'], id: maps[i]['id'],
-          deckID: maps[i]['deckID'], nextReview: DateFormat('yyyy-MM-dd HH:mm:ss').parse(maps[i]['formattedRevDate']), eFactor: maps[i]['eFactor'], repetitions: maps[i]['repetitions']));
+          deckID: maps[i]['deckID'], nextReview: DateFormat('yyyy-MM-dd HH:mm:ss').parse(maps[i]['formattedRevDate']), eFactor: maps[i]['eFactor'],
+        isImage: maps[i]['isImage']==1, repetitions: maps[i]['repetitions']),);
     }else{
       throw Exception('no cards were found');
     }
@@ -264,7 +267,7 @@ class Data{
 
     if(maps.isNotEmpty){
       return Flashcard.withData(maps[id]['front'], maps[id]['back'], id: maps[id]['id'], deckID: maps[id]['deckID'],
-          nextReview: maps[id]['formattedRevDate'], eFactor: maps[id]['eFactor'], repetitions: maps[id]['repetitions']);
+          nextReview: maps[id]['formattedRevDate'], eFactor: maps[id]['eFactor'], repetitions: maps[id]['repetitions'], isImage: maps[id]['isImage']==1);
     }else{
       throw Exception('ID $id is not found');
     }

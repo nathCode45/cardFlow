@@ -54,26 +54,29 @@ class _LaunchDeckState extends State<LaunchDeck> {
           style: const TextStyle(fontFamily: 'Lexend'),
         ),
       ),
-      floatingActionButton: Wrap(
-        direction: Axis.vertical,
+      floatingActionButton: Column(
+        mainAxisAlignment: MainAxisAlignment.end,
         children: [
           FloatingActionButton(
-          onPressed: () async{
-            if(!mounted) return;
-            final value = await Navigator.push(context, MaterialPageRoute(builder: (context)=>CardEdit(selectedDeckID: widget.deck.id,)));
-            setState(() {refreshCards();});
-          },
-          child: Icon(Icons.add),
+            heroTag: "btn1",
+            onPressed: () async{
+              if(!mounted) return;
+              final value = await Navigator.push(context, MaterialPageRoute(builder: (context)=>CardEdit(selectedDeckID: widget.deck.id,)));
+              setState(() {refreshCards();});
+            },
+            child: Icon(Icons.add),
         ),
           const SizedBox(height: 8),
 
           FloatingActionButton(
+            heroTag: "btn2",
             onPressed: () async{
               final cameras = await availableCameras();
 
               final firstCamera = cameras.first;
               if(!mounted) return;
-              Navigator.push(context, MaterialPageRoute(builder: (context)=>ImageCardScreen(camera: firstCamera)));
+              final value = await Navigator.push(context, MaterialPageRoute(builder: (context)=>ImageCardScreen(camera: firstCamera, deckId: widget.deck.id!,)));
+              setState(() {refreshCards();});
             },
             child: Icon(Icons.camera),
           )
@@ -118,7 +121,8 @@ class _LaunchDeckState extends State<LaunchDeck> {
         decoration: const BoxDecoration(border: Border(top:BorderSide(width: 1.0, color: Colors.black))),
         child: ListView.builder(itemCount: cards.length,itemBuilder: (context, index){
           if(cards[index]!=null) {
-            String front = _shorten(NotusDocument.fromJson(jsonDecode(cards[index].front)).toPlainText());//decodes Notus Document stored through JSON in SQL database
+            String front = (cards[index].isImage==null ||(cards[index].isImage!=null && cards[index].isImage==false))? _shorten(NotusDocument.fromJson(jsonDecode(cards[index].front)).toPlainText())
+            : "Image";//decodes Notus Document stored through JSON in SQL database
             return ListTile(
               contentPadding: const EdgeInsets.symmetric(
                   horizontal: 6, vertical: 18.0),
@@ -126,7 +130,16 @@ class _LaunchDeckState extends State<LaunchDeck> {
                   color: Colors.black12, width: 1)),
               leading: const Image(image: AssetImage(
                   'assets/card_icon.png')),
-              title: Text(front),
+              title: (cards[index].isImage==null ||(cards[index].isImage!=null && cards[index].isImage==false))?
+              Text(front):
+              Align(
+                alignment: Alignment.topLeft,
+                child: SizedBox(
+                  width: 50,
+                    height: 100,
+                    child: Image.memory(base64Decode(cards[index].front)) //TODO load the image in a lower resolution
+                ),
+              ),
             );
           }else{
             return Container();

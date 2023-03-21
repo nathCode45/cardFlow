@@ -10,8 +10,9 @@ import 'package:flutter/material.dart';
 
 class ImageCardScreen extends StatefulWidget {
   final CameraDescription camera;
+  final int deckId;
 
-  const ImageCardScreen({Key? key, required this.camera}) : super(key: key);
+  const ImageCardScreen({Key? key, required this.camera, required this.deckId}) : super(key: key);
 
   @override
   State<ImageCardScreen> createState() => _ImageCardScreenState();
@@ -72,6 +73,7 @@ class _ImageCardScreenState extends State<ImageCardScreen> {
                     await Navigator.of(context).pushReplacement(MaterialPageRoute(
                         builder: (context) => DispAndMaskScreen(
                           baseImagePath: image.path,
+                          deckId: widget.deckId,
                         )));
                   } catch (e) {
                     print(e);

@@ -16,7 +16,9 @@ import 'deck_data.dart';
 
 class DispAndMaskScreen extends StatefulWidget {
   final String baseImagePath;
-  const DispAndMaskScreen({Key? key, required this.baseImagePath}) : super(key: key);
+  final int deckId;
+
+  const DispAndMaskScreen({Key? key, required this.baseImagePath, required this.deckId}) : super(key: key);
 
   @override
   State<DispAndMaskScreen> createState() => _DispAndMaskState();
@@ -44,9 +46,7 @@ class _DispAndMaskState extends State<DispAndMaskScreen> {
     imgFile.writeAsBytesSync(image!);
     String finalImage = base64Encode(imgFile.readAsBytesSync());
     String baseImage = base64Encode(File(widget.baseImagePath).readAsBytesSync());
-    await Data.instance.createFlashcard(Flashcard(finalImage,baseImage));
-    //TODO add isImage property to flashcard and database and then make it so that learn screen can display image (or maybe just make sure
-    //the paint works first
+    await Data.instance.createFlashcard(Flashcard(finalImage,baseImage, isImage: true, deckID: widget.deckId));
 
     ScaffoldMessenger.of(context)
         .showSnackBar(SnackBar(content: Text('Saved.')));
@@ -59,7 +59,7 @@ class _DispAndMaskState extends State<DispAndMaskScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       key: _key,
-      appBar: AppBar(leading: IconButton(icon: const Icon(Icons.arrow_back_ios_new), onPressed: ()=>Navigator.pop(context),),), //TODO make this so that
+      appBar: AppBar(),//leading: IconButton(icon: const Icon(Icons.arrow_back_ios_new), onPressed: ()=>Navigator.pop(context),),), //TODO make this so that
       //Todo ...it warns if not saved
       body: Column(
         mainAxisSize: MainAxisSize.min,
@@ -84,7 +84,15 @@ class _DispAndMaskState extends State<DispAndMaskScreen> {
             ),
           ),
           Expanded( flex: 1,
-              child: TextButton(onPressed: (){}, child: Text("Save")))
+              child: Container(
+                alignment: Alignment.center,
+                  child: SizedBox(
+                      child: TextButton(onPressed: (){
+                        saveImage();
+                      }, child: Text("Save"))
+                  )
+              )
+          )
         ],
       ),
     );
