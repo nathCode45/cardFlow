@@ -91,20 +91,30 @@ class Flashcard{
   }
 
   Duration reviewInterval(double grade, int gRepetitions){
-    if(gRepetitions<=2 && grade==0) {
-      return Duration(minutes: 1);
-    } else if(gRepetitions == 1 && grade!=0){
-      return Duration(minutes: 5);
-    }else if(gRepetitions ==2 &&grade!=0) {
-      return Duration(minutes: 10);
-    }else if(grade<3){
+
+    print("eFactor: ${getUpdatedEFactor(grade)}, repetitions: $repetitions ");
+
+
+    if(gRepetitions<=2) {
+      int roundedGrade = grade.round();
+      switch (roundedGrade) {
+        case 0:
+          return const Duration(minutes: 1);
+        case 1:
+          return const Duration(minutes: 2);
+        case 2:
+          return const Duration(minutes: 5);
+        default:
+          return const Duration(minutes: 10);
+      }
+    }else if(grade<2) {
       return reviewInterval(grade, 1);
+    }else if(grade==2) {
+      return Duration(minutes: 10);
     }else if(gRepetitions ==5){
       return(Duration(hours: 18));
     } else {
-      print("recurred, eFactor: ${getUpdatedEFactor(grade)}, repetitions: $repetitions, last review interval ${reviewInterval(grade, gRepetitions-1)} ");
-      return reviewInterval(grade, gRepetitions-1)*getUpdatedEFactor(grade); ///this recursion is what is causing the eFactor to be so large
-
+      return reviewInterval(grade, gRepetitions-1)*getUpdatedEFactor(grade as double); ///this recursion is what is causing the eFactor to be so large
     }
   }
 

@@ -32,6 +32,8 @@ class _LaunchDeckState extends State<LaunchDeck> {
 
 
 
+
+
   Future refreshCards() async{
     setState((){
       isLoading = true;
@@ -62,7 +64,7 @@ class _LaunchDeckState extends State<LaunchDeck> {
             onPressed: () async{
               if(!mounted) return;
               final value = await Navigator.push(context, MaterialPageRoute(builder: (context)=>CardEdit(selectedDeckID: widget.deck.id,)));
-              setState(() {refreshCards();});
+              setState(() {refreshCards(); print("called btn1");});
             },
             child: Icon(Icons.add),
         ),
@@ -75,8 +77,8 @@ class _LaunchDeckState extends State<LaunchDeck> {
 
               final firstCamera = cameras.first;
               if(!mounted) return;
-              final value = await Navigator.push(context, MaterialPageRoute(builder: (context)=>ImageCardScreen(camera: firstCamera, deckId: widget.deck.id!,)));
-              setState(() {refreshCards();});
+              final value = await Navigator.push(context, MaterialPageRoute(builder: (context)=>ImageCardScreen(camera: firstCamera, deck: widget.deck)));
+              setState(() {refreshCards(); print("called btn2");});
             },
             child: Icon(Icons.camera),
           )

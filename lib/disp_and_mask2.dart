@@ -13,12 +13,13 @@ import 'package:path_provider/path_provider.dart';
 
 
 import 'deck_data.dart';
+import 'launch_deck.dart';
 
 class DispAndMaskScreen extends StatefulWidget {
   final String baseImagePath;
-  final int deckId;
+  final Deck deck;
 
-  const DispAndMaskScreen({Key? key, required this.baseImagePath, required this.deckId}) : super(key: key);
+  const DispAndMaskScreen({Key? key, required this.baseImagePath, required this.deck}) : super(key: key);
 
   @override
   State<DispAndMaskScreen> createState() => _DispAndMaskState();
@@ -46,7 +47,7 @@ class _DispAndMaskState extends State<DispAndMaskScreen> {
     imgFile.writeAsBytesSync(image!);
     String finalImage = base64Encode(imgFile.readAsBytesSync());
     String baseImage = base64Encode(File(widget.baseImagePath).readAsBytesSync());
-    await Data.instance.createFlashcard(Flashcard(finalImage,baseImage, isImage: true, deckID: widget.deckId));
+    await Data.instance.createFlashcard(Flashcard(finalImage,baseImage, isImage: true, deckID: widget.deck.id));
 
     ScaffoldMessenger.of(context)
         .showSnackBar(SnackBar(content: Text('Saved.')));
@@ -59,7 +60,7 @@ class _DispAndMaskState extends State<DispAndMaskScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       key: _key,
-      appBar: AppBar(),//leading: IconButton(icon: const Icon(Icons.arrow_back_ios_new), onPressed: ()=>Navigator.pop(context),),), //TODO make this so that
+      appBar: AppBar(leading: IconButton(icon: const Icon(Icons.arrow_back_ios_new), onPressed: ()=>Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>LaunchDeck(deck: widget.deck,))),),), //TODO make this so that
       //Todo ...it warns if not saved
       body: Column(
         mainAxisSize: MainAxisSize.min,
@@ -79,8 +80,6 @@ class _DispAndMaskState extends State<DispAndMaskScreen> {
               initialPaintMode: PaintMode.freeStyle,
               initialStrokeWidth: 30,
               initialColor: Colors.blueAccent,
-
-
             ),
           ),
           Expanded( flex: 1,

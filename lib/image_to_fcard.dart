@@ -6,13 +6,15 @@ import 'package:card_flow/disp_and_mask2.dart';
 import 'package:card_flow/display_and_mask.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+
+import 'deck_data.dart';
 //TODO WARNING:
 
 class ImageCardScreen extends StatefulWidget {
   final CameraDescription camera;
-  final int deckId;
+  final Deck deck;
 
-  const ImageCardScreen({Key? key, required this.camera, required this.deckId}) : super(key: key);
+  const ImageCardScreen({Key? key, required this.camera, required this.deck}) : super(key: key);
 
   @override
   State<ImageCardScreen> createState() => _ImageCardScreenState();
@@ -73,7 +75,7 @@ class _ImageCardScreenState extends State<ImageCardScreen> {
                     await Navigator.of(context).pushReplacement(MaterialPageRoute(
                         builder: (context) => DispAndMaskScreen(
                           baseImagePath: image.path,
-                          deckId: widget.deckId,
+                          deck: widget.deck,
                         )));
                   } catch (e) {
                     print(e);
