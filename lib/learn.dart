@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:ffi';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -18,6 +19,7 @@ class Learn extends StatefulWidget {
 
 class _LearnState extends State<Learn> {
   late List<Flashcard> cards;
+  late Flashcard currentCard;
   bool reveal = false;
   bool isLoading = false;
   late ZefyrController? _controllerFront = ZefyrController();
@@ -25,6 +27,19 @@ class _LearnState extends State<Learn> {
   double _diffFactor = 1;
   double _slideFactor = 0.5;
   int _correctIndex = 0;
+
+
+  Flashcard getLearnCard(){
+    int nearest = 0;
+    for(int i = 0; i<cards.length; i++){
+      if(cards[i].nextReview.compareTo(DateTime.now())<0 && cards[i].nextReview.compareTo(cards[nearest].nextReview)<0){
+        nearest = i;
+      }
+    }
+
+    return cards[nearest];
+
+  }
 
 
   @override
@@ -47,7 +62,8 @@ class _LearnState extends State<Learn> {
       isLoading = true;
     });
     cards = await widget.deck.getCards();
-    _loadDocument(cards[0].front).then((document){
+    currentCard = getLearnCard();
+    _loadDocument(currentCard.front).then((document){
       setState(() {
         _controllerFront = ZefyrController(document);
       });
@@ -125,7 +141,7 @@ class _LearnState extends State<Learn> {
                       setState(() {
                         isLoading = true;
                       });
-                      _loadDocument(cards[0].back).then((document) {
+                      _loadDocument(currentCard.back).then((document) {
                         setState(() {
                           _controllerBack = ZefyrController(document);
                         });
@@ -157,7 +173,7 @@ class _LearnState extends State<Learn> {
                 // ),
                 Padding(
                   padding: const EdgeInsets.fromLTRB(16,8,16,8),
-                  child: SliderWidget(card: cards[0], onSliderChanged: (double value){_diffFactor = value;}),
+                  child: SliderWidget(card: currentCard, onSliderChanged: (double value){_diffFactor = value;}),
                 ),
                 // Container(
                 //   decoration: const BoxDecoration(
@@ -195,11 +211,13 @@ class _LearnState extends State<Learn> {
               padding: const EdgeInsets.all(8.0),
               child: ElevatedButton(onPressed: ((){
                 setState(() {
-                  cards[0].updateRepetitions(_diffFactor);
+                  currentCard.updateRepetitions(_diffFactor);
                   if(_diffFactor>=3) {
-                    cards[0].eFactor = cards[0].getUpdatedEFactor(_diffFactor);
-                    print("Updated eFactor: ${cards[0].getUpdatedEFactor(_diffFactor)}");
+                    currentCard.eFactor = currentCard.getUpdatedEFactor(_diffFactor);
+                    //print("Updated eFactor: ${currentCard.getUpdatedEFactor(_diffFactor)}");
                   }
+                  currentCard.nextReview = currentCard.nextReview.add(currentCard.reviewInterval(_diffFactor, currentCard.repetitions)); //schedule next review
+                  refreshCards();
                 });
 
               }), child: Icon(Icons.arrow_forward_ios_sharp)),

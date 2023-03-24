@@ -92,11 +92,10 @@ class Flashcard{
 
   Duration reviewInterval(double grade, int gRepetitions){
 
-    print("eFactor: ${getUpdatedEFactor(grade)}, repetitions: $repetitions ");
+    //print("eFactor: ${getUpdatedEFactor(grade)}, repetitions: $repetitions ");
 
-
+    int roundedGrade = grade.round();
     if(gRepetitions<=2) {
-      int roundedGrade = grade.round();
       switch (roundedGrade) {
         case 0:
           return const Duration(minutes: 1);
@@ -104,31 +103,44 @@ class Flashcard{
           return const Duration(minutes: 2);
         case 2:
           return const Duration(minutes: 5);
-        default:
+        case 3:
+          return const Duration(minutes: 8);
+        case 4:
           return const Duration(minutes: 10);
+        default:
+          return const Duration(minutes: 15);
       }
-    }else if(grade<2) {
-      return reviewInterval(grade, 1);
-    }else if(grade==2) {
-      return Duration(minutes: 10);
-    }else if(gRepetitions ==5){
-      return(Duration(hours: 18));
-    } else {
-      return reviewInterval(grade, gRepetitions-1)*getUpdatedEFactor(grade as double); ///this recursion is what is causing the eFactor to be so large
+    }
+    // else{
+    //   switch(roundedGrade){
+    //     case 0:
+    //       return const Duration(minutes: 2);
+    //     case 1:
+    //       return const Duration(minutes: 5);
+    //     case 2:
+    //       return const Duration(minutes: 5);
+    //   }
+    //   return(Duration(hours: 18));
+    else {
+      return reviewInterval(grade, gRepetitions-1)* eFactor;  //getUpdatedEFactor(grade); ///this recursion is what is causing the eFactor to be so large
     }
   }
 
   double getUpdatedEFactor(double grade){
     double tempEFactor;
-    if(eFactor<0.3){
+    if(eFactor<1.3){
+      //eFactor = 1.3;
       tempEFactor = 0.3;
     }else{
+
+      tempEFactor = eFactor - 0.8 + 0.28 * grade -0.02 * grade * grade;
+
       var eMultiplier = 0.9; ///initially 0.02
-      tempEFactor = (1/15)*pow(grade-3,3)+1;///(0.1-(5-grade)*((0.1-eMultiplier)+(5-grade)*eMultiplier));///eFactor + (grade-3)*0.5;
+      //tempEFactor = (1/15)*pow(grade-3,3)+1;///(0.1-(5-grade)*((0.1-eMultiplier)+(5-grade)*eMultiplier));///eFactor + (grade-3)*0.5;
       //print("eFactor = eFactor + ${(0.1-(5-grade)*(0.08+(5-grade)*0.02))} = $eFactor");
 
     }
-    return tempEFactor;
+    return tempEFactor;//tempEFactor;
 
   }
 
