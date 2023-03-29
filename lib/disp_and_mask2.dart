@@ -65,31 +65,26 @@ class _DispAndMaskState extends State<DispAndMaskScreen> {
       body: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Expanded(
-            flex: 4,
-            child: ImagePainter.asset(
-              widget.baseImagePath,
-              controlsAtTop: true,
-              scalable: true,
-              key: _imageKey,
-              //height: 500, //TODO make this a size that will work for every screen
-              width: MediaQuery.of(context).size.width,
-              brushIcon: const Icon(Icons.brush_outlined),
-              undoIcon: const Icon(Icons.undo),
-              clearAllIcon: const Icon(Icons.clear_all_sharp),
-              initialPaintMode: PaintMode.freeStyle,
-              initialStrokeWidth: 30,
-              initialColor: Colors.blueAccent,
-            ),
+          ImagePainter.asset(
+            widget.baseImagePath,
+            controlsAtTop: true,
+            scalable: true,
+            key: _imageKey,
+            //height: 500, //TODO make this a size that will work for every screen
+            width: MediaQuery.of(context).size.width,
+            brushIcon: const Icon(Icons.brush_outlined),
+            undoIcon: const Icon(Icons.undo),
+            clearAllIcon: const Icon(Icons.clear_all_sharp),
+            initialPaintMode: PaintMode.freeStyle,
+            initialStrokeWidth: 30,
+            initialColor: Colors.blueAccent,
           ),
-          Expanded( flex: 1,
-              child: Container(
-                alignment: Alignment.center,
-                  child: SizedBox(
-                      child: TextButton(onPressed: (){
-                        saveImage();
-                      }, child: Text("Save"))
-                  )
+          Container(
+            alignment: Alignment.center,
+              child: SizedBox(
+                  child: TextButton(onPressed: (){
+                    saveImage();
+                  }, child: Text("Save"))
               )
           )
         ],
