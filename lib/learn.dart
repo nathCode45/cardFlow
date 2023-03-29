@@ -19,25 +19,55 @@ class Learn extends StatefulWidget {
 
 class _LearnState extends State<Learn> {
   late List<Flashcard> cards;
-  late Flashcard currentCard;
+  late Flashcard? currentCard;
   bool reveal = false;
   bool isLoading = false;
+  bool isCardsDue = false;
+
   late ZefyrController? _controllerFront = ZefyrController();
   late ZefyrController? _controllerBack = ZefyrController();
-  double _diffFactor = 1;
-  double _slideFactor = 0.5;
-  int _correctIndex = 0;
+  double _diffFactor = 0;
 
-
-  Flashcard getLearnCard(){
-    int nearest = 0;
+  DateTime _getWhenNext(){
+    DateTime nearest = cards[0].nextReview;
     for(int i = 0; i<cards.length; i++){
-      if(cards[i].nextReview.compareTo(DateTime.now())<0 && cards[i].nextReview.compareTo(cards[nearest].nextReview)<0){
-        nearest = i;
+      if(cards[i].nextReview.compareTo(nearest) < 0){
+        nearest = cards[i].nextReview;
+      }
+    }
+    return nearest;
+  }
+
+
+
+  Flashcard? getLearnCard(){
+    print("getLearnCard() called");
+    int nearest = 0;
+
+    List<int> dueListIDs = []; //list of ids instead of entire cards, in order to save space
+
+    for(int i = 0; i<cards.length; i++){
+      if(cards[i].nextReview.compareTo(DateTime.now()) < 0){
+        dueListIDs.add(cards[i].id!);
+        print("${cards[i].front} added to Due List");
       }
     }
 
-    return cards[nearest];
+    if(dueListIDs.isNotEmpty) {
+      for (int i = 0; i < dueListIDs.length; i++) {
+        for (int j = 0; j < cards.length; j++) {
+          if (cards[j].id == dueListIDs[i] &&
+              cards[j].nextReview.compareTo(cards[nearest].nextReview) < 0) {
+            nearest = j;
+          }
+        }
+      }
+      return cards[nearest];
+    }else{
+      return null;
+    }
+
+
 
   }
 
@@ -62,13 +92,36 @@ class _LearnState extends State<Learn> {
       isLoading = true;
     });
     cards = await widget.deck.getCards();
+
     currentCard = getLearnCard();
-    _loadDocument(currentCard.front).then((document){
+
+    if(currentCard==null){
       setState(() {
-        _controllerFront = ZefyrController(document);
+        isCardsDue = false;
       });
-    });
+    }else{
+      _loadDocument(currentCard!.front).then((document){
+        setState(() {
+          _controllerFront = ZefyrController(document);
+        });
+      });
+
+      _loadDocument(currentCard!.back).then(
+              (document){
+            setState(() {
+              _controllerBack = ZefyrController(document);
+            });
+          }
+      );
+
+      setState(() {
+        isCardsDue = true;
+      });
+
+    }
+
     setState(() => isLoading = false);
+
   }
 
 
@@ -82,7 +135,7 @@ class _LearnState extends State<Learn> {
 
   @override
   Widget build(BuildContext context) {
-
+    _diffFactor = 0; //reset diff factor to zero because thats how the slider widget intiitalizes
 
 
 
@@ -94,7 +147,8 @@ class _LearnState extends State<Learn> {
           style: const TextStyle(fontFamily: 'Lexend'),
         ),
       ),
-      body: Center(child:
+      body: (isCardsDue) ?
+      Center(child:
         Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           mainAxisAlignment: MainAxisAlignment.start,
@@ -141,7 +195,7 @@ class _LearnState extends State<Learn> {
                       setState(() {
                         isLoading = true;
                       });
-                      _loadDocument(currentCard.back).then((document) {
+                      _loadDocument(currentCard!.back).then((document) {
                         setState(() {
                           _controllerBack = ZefyrController(document);
                         });
@@ -173,7 +227,7 @@ class _LearnState extends State<Learn> {
                 // ),
                 Padding(
                   padding: const EdgeInsets.fromLTRB(16,8,16,8),
-                  child: SliderWidget(card: currentCard, onSliderChanged: (double value){_diffFactor = value;}),
+                  child: SliderWidget(card: currentCard!, onSliderChanged: (double value){_diffFactor = value;}),
                 ),
                 // Container(
                 //   decoration: const BoxDecoration(
@@ -211,12 +265,26 @@ class _LearnState extends State<Learn> {
               padding: const EdgeInsets.all(8.0),
               child: ElevatedButton(onPressed: ((){
                 setState(() {
-                  currentCard.updateRepetitions(_diffFactor);
-                  if(_diffFactor>=3) {
-                    currentCard.eFactor = currentCard.getUpdatedEFactor(_diffFactor);
-                    //print("Updated eFactor: ${currentCard.getUpdatedEFactor(_diffFactor)}");
-                  }
-                  currentCard.nextReview = currentCard.nextReview.add(currentCard.reviewInterval(_diffFactor, currentCard.repetitions)); //schedule next review
+                  print("\n ${currentCard!.front.toString()} diffFactor:${_diffFactor} repetitions: ${currentCard!.repetitions}");
+                  currentCard!.nextReview = DateTime.now().add(currentCard!.reviewInterval(_diffFactor, currentCard!.repetitions)); //schedule next review
+                  print("\n\n ${currentCard!.front.toString()} next review interval:${currentCard!.reviewInterval(_diffFactor, currentCard!.repetitions)} nextReview: ${currentCard!.nextReview}");
+
+                  currentCard!.updateRepetitions(_diffFactor);
+
+
+                  // if(_diffFactor>=3) {
+                  //   currentCard!.eFactor = currentCard!.getUpdatedEFactor(_diffFactor);
+                  //   //print("Updated eFactor: ${currentCard.getUpdatedEFactor(_diffFactor)}");
+                  // }
+                  currentCard!.eFactor = currentCard!.getUpdatedEFactor(_diffFactor);
+
+
+                  Data.instance.updateFlashcard(currentCard!);
+
+                  reveal = false;
+
+
+
                   refreshCards();
                 });
 
@@ -225,7 +293,28 @@ class _LearnState extends State<Learn> {
           ],
         )
 
-      ),
+      ):
+      Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+
+              children: [
+                (isLoading)? CircularProgressIndicator():Text("Next card due in: ${
+                    SliderWidget.formattedTime(_getWhenNext().difference(DateTime.now()), seconds: true) //uses formatted time from slider widget
+                }"),
+                TextButton(onPressed: refreshCards, child: Text("Refresh")),
+                const Center(
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 20, vertical: 0),
+                    child: Text("Waiting betweeen repetitions enhances memory, but if you're in a rush you can skip to the next review"),
+                  ),
+                ),
+                TextButton.icon(onPressed: (){}, icon: Icon(Icons.skip_next), label: Text("Skip"),)
+
+              ]
+          )
+      ) //if not isCardsDue
+      ,
     );
   }
 }

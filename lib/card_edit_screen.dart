@@ -207,10 +207,19 @@ class _CardEditState extends State<CardEdit> {
 
   void _saveDocument(BuildContext context) async {
     final contents = jsonEncode(_controller!.document);
-    final contents2 = jsonEncode(_controller!.document);
+    final contents2 = jsonEncode(_controller2!.document);
     await Data.instance.createFlashcard(Flashcard(contents, contents2, deckID: widget.selectedDeckID));
     ScaffoldMessenger.of(context)
         .showSnackBar(SnackBar(content: Text('Saved.')));
+
+    ///reset controllers to be empty
+    setState(() {
+      _controller = ZefyrController();
+      _controller2 = ZefyrController();
+    });
+
+
+
 
     // final file = File(Directory.systemTemp.path + '/front_save.json');
     // final file2 = File(Directory.systemTemp.path + "/back_save.json");

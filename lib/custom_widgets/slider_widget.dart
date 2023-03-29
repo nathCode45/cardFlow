@@ -22,9 +22,21 @@ class SliderWidget extends StatefulWidget {
   @override
   _SliderWidgetState createState() => _SliderWidgetState();
 
-  String formattedTime(Duration t){
+  static String formattedTime(Duration t, {bool seconds = false}){
     if(t.inMinutes<120){
-      return "${t.inMinutes} minutes";
+      if(!seconds){
+        if(t.inMinutes<1){
+          return "<1 minute";
+        }else{
+          return "${t.inMinutes} minutes";
+        }
+      }else{
+        if (t.inMinutes<2){
+          return "${t.inSeconds} seconds";
+        }else{
+          return "${t.inMinutes} minutes";
+        }
+      }
     }else if(t.inHours<24){
       return "${t.inHours} hour${(t.inHours>1)?"s":""}";
     }else if(t.inDays<7){
@@ -46,6 +58,9 @@ class _SliderWidgetState extends State<SliderWidget> {
     double paddingFactor = .2;
 
     if (this.widget.fullWidth) paddingFactor = .3;
+
+
+    print("Card reps: ${widget.card.repetitions}");
 
     return Column(
       children: [
@@ -114,10 +129,10 @@ class _SliderWidgetState extends State<SliderWidget> {
                   child:
                     Slider(
                       min: 0,
-                      max: 6,
+                      max: 5,
                       value: _slideFactor,
                       divisions: 5,
-                      label: "Next repetition: ${widget.formattedTime(widget.card.reviewInterval(_slideFactor, widget.card.repetitions))}",
+                      label: "Next repetition: ${SliderWidget.formattedTime(widget.card.reviewInterval(_slideFactor, widget.card.repetitions))}",
                       onChanged: (double value) {
                         setState(() {
                           _slideFactor = value;

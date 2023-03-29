@@ -55,7 +55,7 @@ class Flashcard{
   int repetitions;
   DateTime nextReview;
 
-  static const double INITIAL_EFACTOR = 2.5;
+  static const double INITIAL_EFACTOR = 1.5;//2.5;
 
   Flashcard(this.front, this.back, {this.id, this.deckID, this.isImage}):
     nextReview = DateTime.now(),
@@ -98,13 +98,13 @@ class Flashcard{
     if(gRepetitions<=2) {
       switch (roundedGrade) {
         case 0:
-          return const Duration(minutes: 1);
+          return const Duration(seconds: 5);
         case 1:
-          return const Duration(minutes: 2);
+          return const Duration(minutes: 1);
         case 2:
-          return const Duration(minutes: 5);
+          return const Duration(minutes: 2);
         case 3:
-          return const Duration(minutes: 8);
+          return const Duration(minutes: 5);
         case 4:
           return const Duration(minutes: 10);
         default:
@@ -130,7 +130,7 @@ class Flashcard{
     double tempEFactor;
     if(eFactor<1.3){
       //eFactor = 1.3;
-      tempEFactor = 0.3;
+      tempEFactor = 1.3;
     }else{
 
       tempEFactor = eFactor - 0.8 + 0.28 * grade -0.02 * grade * grade;
@@ -147,7 +147,7 @@ class Flashcard{
   void updateRepetitions(double grade){
     if(grade<3 && repetitions > 3){
       repetitions = repetitions-2;
-    }else{
+    } else{
       repeat();
     }
   }
@@ -309,6 +309,13 @@ class Data{
     return await db.delete('flashcards', where: 'id = ?', whereArgs: [id]);//TODO this isn't working
 
   }
+
+  Future<void> updateFlashcard(Flashcard flashcard) async{
+    final db = await instance.database;
+
+    await db.update('flashcards', flashcard.toMap(), where: 'id = ?', whereArgs: [flashcard.id]);
+  }
+
 
   Future deleteAllDecks() async{
     final db = await instance.database;
