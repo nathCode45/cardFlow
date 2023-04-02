@@ -60,11 +60,16 @@ class _DispAndMaskState extends State<DispAndMaskScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       key: _key,
-      appBar: AppBar(leading: IconButton(icon: const Icon(Icons.arrow_back_ios_new), onPressed: ()=>Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>LaunchDeck(deck: widget.deck,))),),), //TODO make this so that
+      appBar: AppBar(
+        leading: IconButton(icon: const Icon(Icons.arrow_back_ios_new),
+          onPressed: ()=>Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>LaunchDeck(deck: widget.deck,)))
+          ,),
+        actions: [
+          IconButton(onPressed: (){saveImage();}, icon: const Icon(Icons.save))
+        ],
+      ), //TODO make this so that
       //Todo ...it warns if not saved
-      body: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
+      body:
           ImagePainter.asset(
             widget.baseImagePath,
             controlsAtTop: true,
@@ -79,16 +84,34 @@ class _DispAndMaskState extends State<DispAndMaskScreen> {
             initialStrokeWidth: 30,
             initialColor: Colors.blueAccent,
           ),
-          Container(
-            alignment: Alignment.center,
-              child: SizedBox(
-                  child: TextButton(onPressed: (){
-                    saveImage();
-                  }, child: Text("Save"))
-              )
-          )
-        ],
-      ),
+
+      // Column(
+      //   mainAxisSize: MainAxisSize.min,
+      //   children: [
+      //     ImagePainter.asset(
+      //       widget.baseImagePath,
+      //       controlsAtTop: true,
+      //       scalable: true,
+      //       key: _imageKey,
+      //       //height: 500, //TODO make this a size that will work for every screen
+      //       width: MediaQuery.of(context).size.width,
+      //       brushIcon: const Icon(Icons.brush_outlined),
+      //       undoIcon: const Icon(Icons.undo),
+      //       clearAllIcon: const Icon(Icons.clear_all_sharp),
+      //       initialPaintMode: PaintMode.freeStyle,
+      //       initialStrokeWidth: 30,
+      //       initialColor: Colors.blueAccent,
+      //     ),
+      //     Container(
+      //       alignment: Alignment.center,
+      //         child: SizedBox(
+      //             child: TextButton(onPressed: (){
+      //               saveImage();
+      //             }, child: Text("Save"))
+      //         )
+      //     )
+      //   ],
+      // ),
     );
   }
 }
