@@ -65,53 +65,58 @@ class _DispAndMaskState extends State<DispAndMaskScreen> {
           onPressed: ()=>Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>LaunchDeck(deck: widget.deck,)))
           ,),
         actions: [
-          IconButton(onPressed: (){saveImage();}, icon: const Icon(Icons.save))
+          //IconButton(onPressed: (){saveImage();}, icon: const Icon(Icons.save))
         ],
       ), //TODO make this so that
       //Todo ...it warns if not saved
       body:
-          ImagePainter.asset(
-            widget.baseImagePath,
-            controlsAtTop: true,
-            scalable: true,
-            key: _imageKey,
-            //height: 500, //TODO make this a size that will work for every screen
-            width: MediaQuery.of(context).size.width,
-            brushIcon: const Icon(Icons.brush_outlined),
-            undoIcon: const Icon(Icons.undo),
-            clearAllIcon: const Icon(Icons.clear_all_sharp),
-            initialPaintMode: PaintMode.freeStyle,
-            initialStrokeWidth: 30,
-            initialColor: Colors.blueAccent,
-          ),
+          // ImagePainter.asset(
+          //   widget.baseImagePath,
+          //   controlsAtTop: true,
+          //   scalable: true,
+          //   key: _imageKey,
+          //   //height: 500, //TODO make this a size that will work for every screen
+          //   width: MediaQuery.of(context).size.width,
+          //   brushIcon: const Icon(Icons.brush_outlined),
+          //   undoIcon: const Icon(Icons.undo),
+          //   clearAllIcon: const Icon(Icons.clear_all_outlined),
+          //   initialPaintMode: PaintMode.freeStyle,
+          //   initialStrokeWidth: 30,
+          //   initialColor: Colors.blueAccent,
+          // ),
 
-      // Column(
-      //   mainAxisSize: MainAxisSize.min,
-      //   children: [
-      //     ImagePainter.asset(
-      //       widget.baseImagePath,
-      //       controlsAtTop: true,
-      //       scalable: true,
-      //       key: _imageKey,
-      //       //height: 500, //TODO make this a size that will work for every screen
-      //       width: MediaQuery.of(context).size.width,
-      //       brushIcon: const Icon(Icons.brush_outlined),
-      //       undoIcon: const Icon(Icons.undo),
-      //       clearAllIcon: const Icon(Icons.clear_all_sharp),
-      //       initialPaintMode: PaintMode.freeStyle,
-      //       initialStrokeWidth: 30,
-      //       initialColor: Colors.blueAccent,
-      //     ),
-      //     Container(
-      //       alignment: Alignment.center,
-      //         child: SizedBox(
-      //             child: TextButton(onPressed: (){
-      //               saveImage();
-      //             }, child: Text("Save"))
-      //         )
-      //     )
-      //   ],
-      // ),
+      Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Flexible(
+            flex: 3,
+            child: ImagePainter.asset(
+              widget.baseImagePath,
+              controlsAtTop: true,
+              scalable: true,
+              key: _imageKey,
+              //height: 500, //TODO make this a size that will work for every screen
+              width: MediaQuery.of(context).size.width,
+              brushIcon: const Icon(Icons.brush_outlined),
+              undoIcon: const Icon(Icons.undo),
+              clearAllIcon: const Icon(Icons.clear_all_sharp),
+              initialPaintMode: PaintMode.freeStyle,
+              initialStrokeWidth: 30,
+              initialColor: Colors.blueAccent,
+            ),
+          ),
+          Flexible(
+            child: Container(
+              alignment: Alignment.center,
+                child: SizedBox(
+                    child: TextButton(onPressed: (){
+                      saveImage();
+                    }, child: Text("Save"))
+                )
+            ),
+          )
+        ],
+      ),
     );
   }
 }
