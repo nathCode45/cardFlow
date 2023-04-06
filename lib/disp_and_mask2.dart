@@ -55,6 +55,36 @@ class _DispAndMaskState extends State<DispAndMaskScreen> {
 
   }
 
+  Future<void> _showExitDialog() async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Are you sure you want to quit?'),
+          content: const SingleChildScrollView(
+              child: Text("If you exit, you will lose your progress and your card will not be saved.")
+          ),
+          actions: <Widget>[
+            TextButton(
+              autofocus: true,
+              child: const Text('NO'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+                onPressed: (){
+                  Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>LaunchDeck(deck: widget.deck,)));
+                },
+                child: const Text("YES")
+            ),
+          ],
+        );
+      },
+    );
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -62,7 +92,7 @@ class _DispAndMaskState extends State<DispAndMaskScreen> {
       key: _key,
       appBar: AppBar(
         leading: IconButton(icon: const Icon(Icons.arrow_back_ios_new),
-          onPressed: ()=>Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>LaunchDeck(deck: widget.deck,)))
+          onPressed: ()=>_showExitDialog()
           ,),
         actions: [
           //IconButton(onPressed: (){saveImage();}, icon: const Icon(Icons.save))
