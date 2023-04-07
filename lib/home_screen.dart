@@ -97,8 +97,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         itemBuilder: (context, index) {
           return ListTile(
             onTap: () {
-              Navigator.push(context, MaterialPageRoute(
-                  builder: (context) => LaunchDeck(deck: decks[index])));
+              Navigator.pushNamed(context, LaunchDeck.routeName, arguments: decks[index]);
             },
             contentPadding: const EdgeInsets.symmetric(
                 horizontal: 6, vertical: 18.0),

@@ -15,13 +15,20 @@ class DeckDrop{
 
 }
 
+class CardEditScreenArguments{
+  Flashcard? card;
+  final int selectedDeckID;
+
+  CardEditScreenArguments({this.card, required this.selectedDeckID});
+}
+
 
 class CardEdit extends StatefulWidget {
-  Flashcard? card;
-  int? selectedDeckID;
+
+  static const routeName = '/card_edit';
 
 
-  CardEdit({super.key, this.card, this.selectedDeckID});
+  const CardEdit({super.key});
 
 
   @override
@@ -39,6 +46,8 @@ class _CardEditState extends State<CardEdit> {
   late List<Deck> decks;
   late List<DeckDrop> drops;
   Map<int, String> deckDropMap={};
+
+  var args;
 
 
 
@@ -67,6 +76,7 @@ class _CardEditState extends State<CardEdit> {
     // TODO: implement initState
     super.initState();
 
+
     refreshDecks();
 
 
@@ -77,13 +87,15 @@ class _CardEditState extends State<CardEdit> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.card == null) {
-      widget.card = Flashcard("", "", id: 1);
+    args = ModalRoute.of(context)!.settings.arguments as CardEditScreenArguments;
+
+    if (args.card == null) {
+      args.card = Flashcard("", "", id: 1);
     }
     return Scaffold(
         appBar: AppBar(
           title: Text(
-            widget.card!.front,
+            args.card!.front,
             style: const TextStyle(fontFamily: 'Lexend'),
           ),
         ),
@@ -103,7 +115,7 @@ class _CardEditState extends State<CardEdit> {
                         fontFamily: "Lexend",
                         fontWeight: FontWeight.bold)),
                     isLoading? const Center(child: CircularProgressIndicator()) : DropdownButton<int>(
-                        value: widget.selectedDeckID,
+                        value: args.selectedDeckID,
                         items:
                         deckDropMap.keys.toList().map<DropdownMenuItem<int>>((int idv){
                           print("current decks: ${decks}");
@@ -113,7 +125,7 @@ class _CardEditState extends State<CardEdit> {
                         ).toList(),
                         onChanged: (int? idv) {
                           setState(() {
-                            widget.selectedDeckID = idv!;
+                            args.selectedDeckID = idv!;
                           });
                         }
                     )
@@ -208,7 +220,7 @@ class _CardEditState extends State<CardEdit> {
   void _saveDocument(BuildContext context) async {
     final contents = jsonEncode(_controller!.document);
     final contents2 = jsonEncode(_controller2!.document);
-    await Data.instance.createFlashcard(Flashcard(contents, contents2, deckID: widget.selectedDeckID));
+    await Data.instance.createFlashcard(Flashcard(contents, contents2, deckID: args.selectedDeckID));
     ScaffoldMessenger.of(context)
         .showSnackBar(SnackBar(content: Text('Saved.')));
 

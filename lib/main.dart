@@ -6,6 +6,7 @@ import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:zefyrka/zefyrka.dart';
 import 'package:card_flow/home_screen.dart';
+import 'card_edit_screen.dart';
 import 'deck_data.dart';
 
 void main() async {
@@ -31,14 +32,15 @@ void main() async {
 
   await Data.instance.createDeck(Deck(name: "Trigonometry Identities", cardsDue: 8, dateCreated: DateTime.now()));
 
-  runApp(const MaterialApp(
-      home: HomeScreen(),
-      // initialRoute: '/',
-      // routes: {
-      //   // When navigating to the "/" route, build the FirstScreen widget.
-      //   '/': (context) => const HomeScreen(),
-      //   //'/launch_deck': (context) => const LaunchDeck(deck: decks,)),
-      // }
+  runApp(MaterialApp(
+      initialRoute: '/',
+      routes: {
+        // When navigating to the "/" route, build the FirstScreen widget.
+        '/': (context) => const HomeScreen(),
+        LaunchDeck.routeName: (context)=> const LaunchDeck(),
+        CardEdit.routeName: (context)=> const CardEdit(),
+        //'/launch_deck': (context) => const LaunchDeck(deck: decks,)),
+      }
   ),
     
   );

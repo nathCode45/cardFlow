@@ -11,9 +11,11 @@ import 'deck_data.dart';
 import 'learn.dart';
 
 class LaunchDeck extends StatefulWidget {
-  const LaunchDeck({super.key, required this.deck});
 
-  final Deck deck;
+  static const routeName = '/launch_deck';
+
+  const LaunchDeck({super.key});
+
 
   @override
   State<LaunchDeck> createState() => _LaunchDeckState();
@@ -23,10 +25,19 @@ class _LaunchDeckState extends State<LaunchDeck> {
   late List<Flashcard> cards;
   bool isLoading = false;
 
+  var args;
+
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
+  }
+
+  @override
+  void didChangeDependencies() {
+    // TODO: implement didChangeDependencies
+    super.didChangeDependencies();
+    args = ModalRoute.of(context)!.settings.arguments as Deck;
     refreshCards();
   }
 
@@ -38,7 +49,7 @@ class _LaunchDeckState extends State<LaunchDeck> {
     setState((){
       isLoading = true;
     });
-    cards = await widget.deck.getCards();
+    cards = await args.getCards();
 
     setState(() => isLoading = false);
   }
@@ -48,11 +59,14 @@ class _LaunchDeckState extends State<LaunchDeck> {
 
   @override
   Widget build(BuildContext context) {
+
+
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
         title: Text(
-          widget.deck.name,
+          args.name,
           style: const TextStyle(fontFamily: 'Lexend'),
         ),
       ),
@@ -63,7 +77,7 @@ class _LaunchDeckState extends State<LaunchDeck> {
             heroTag: "btn1",
             onPressed: () async{
               if(!mounted) return;
-              final value = await Navigator.push(context, MaterialPageRoute(builder: (context)=>CardEdit(selectedDeckID: widget.deck.id,)));
+              final value = await Navigator.pushNamed(context, CardEdit.routeName, arguments: CardEditScreenArguments(selectedDeckID: args.id!));
               setState(() {refreshCards(); print("called btn1");});
             },
             child: Icon(Icons.add),
@@ -77,7 +91,7 @@ class _LaunchDeckState extends State<LaunchDeck> {
 
               final firstCamera = cameras.first;
               if(!mounted) return;
-              final value = await Navigator.push(context, MaterialPageRoute(builder: (context)=>ImageCardScreen(camera: firstCamera, deck: widget.deck)));
+              final value = await Navigator.push(context, MaterialPageRoute(builder: (context)=>ImageCardScreen(camera: firstCamera, deck: args)));
               setState(() {refreshCards(); print("called btn2");});
             },
             child: Icon(Icons.camera),
@@ -95,14 +109,14 @@ class _LaunchDeckState extends State<LaunchDeck> {
                             fontSize: 26.0, color: Colors.black, fontFamily: "Lexend"),
                         children: [
                       TextSpan(
-                          text: '${widget.deck.cardsDue} ',
+                          text: '${args.cardsDue} ',
                           style: TextStyle(fontWeight: FontWeight.bold)),
                       const TextSpan(text: 'Cards Due')
                     ]))),
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 32.0),
               child: OutlinedButton(onPressed: (){
-                Navigator.push(context, MaterialPageRoute(builder: (context) => Learn(deck: widget.deck)));
+                Navigator.push(context, MaterialPageRoute(builder: (context) => Learn(deck: args)));
               }, child: Text("Start Studying", style: TextStyle(fontFamily: "Lexend"),)),
             ),
             Expanded(

@@ -75,7 +75,8 @@ class _DispAndMaskState extends State<DispAndMaskScreen> {
             ),
             TextButton(
                 onPressed: (){
-                  Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>LaunchDeck(deck: widget.deck,)));
+                  Navigator.popUntil(context, ModalRoute.withName(LaunchDeck.routeName));
+
                 },
                 child: const Text("YES")
             ),
