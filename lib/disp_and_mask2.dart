@@ -30,6 +30,8 @@ class _DispAndMaskState extends State<DispAndMaskScreen> {
   final _imageKey = GlobalKey<ImagePainterState>();
   final _key = GlobalKey<ScaffoldState>();
   late final Uint8List baseImage;
+  bool isNewEdits = false;
+  
 
   @override
   void initState() {
@@ -75,7 +77,9 @@ class _DispAndMaskState extends State<DispAndMaskScreen> {
             ),
             TextButton(
                 onPressed: (){
-                  Navigator.popUntil(context, ModalRoute.withName(LaunchDeck.routeName));
+                 // Navigator.popUntil(context, ModalRoute.withName(LaunchDeck.routeName));
+                  Navigator.pushNamedAndRemoveUntil(context, LaunchDeck.routeName, ModalRoute.withName('/'), arguments: widget.deck);
+
 
                 },
                 child: const Text("YES")
@@ -86,6 +90,12 @@ class _DispAndMaskState extends State<DispAndMaskScreen> {
     );
   }
 
+  void newEdit(){
+    isNewEdits = true;
+    print(isNewEdits);
+  }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -93,30 +103,16 @@ class _DispAndMaskState extends State<DispAndMaskScreen> {
       key: _key,
       appBar: AppBar(
         leading: IconButton(icon: const Icon(Icons.arrow_back_ios_new),
-          onPressed: ()=>_showExitDialog()
+          onPressed: ()=>(isNewEdits)?
+            _showExitDialog():
+            Navigator.pushNamedAndRemoveUntil(context, LaunchDeck.routeName, ModalRoute.withName('/'), arguments: widget.deck)
           ,),
         actions: [
           //IconButton(onPressed: (){saveImage();}, icon: const Icon(Icons.save))
         ],
       ), //TODO make this so that
       //Todo ...it warns if not saved
-      body:
-          // ImagePainter.asset(
-          //   widget.baseImagePath,
-          //   controlsAtTop: true,
-          //   scalable: true,
-          //   key: _imageKey,
-          //   //height: 500, //TODO make this a size that will work for every screen
-          //   width: MediaQuery.of(context).size.width,
-          //   brushIcon: const Icon(Icons.brush_outlined),
-          //   undoIcon: const Icon(Icons.undo),
-          //   clearAllIcon: const Icon(Icons.clear_all_outlined),
-          //   initialPaintMode: PaintMode.freeStyle,
-          //   initialStrokeWidth: 30,
-          //   initialColor: Colors.blueAccent,
-          // ),
-
-      Column(
+      body: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           Flexible(
@@ -142,6 +138,7 @@ class _DispAndMaskState extends State<DispAndMaskScreen> {
                 child: SizedBox(
                     child: TextButton(onPressed: (){
                       saveImage();
+                      isNewEdits = false;
                     }, child: Text("Save"))
                 )
             ),
