@@ -130,6 +130,7 @@ class _DispAndMaskState extends State<DispAndMaskScreen> {
               initialPaintMode: PaintMode.freeStyle,
               initialStrokeWidth: 30,
               initialColor: Colors.blueAccent,
+              onEdit: newEdit,
             ),
           ),
           Flexible(
