@@ -31,6 +31,7 @@ class _DispAndMaskState extends State<DispAndMaskScreen> {
   final _key = GlobalKey<ScaffoldState>();
   late final Uint8List baseImage;
   bool isNewEdits = false;
+  int numClears = 0;
   
 
   @override
@@ -92,18 +93,31 @@ class _DispAndMaskState extends State<DispAndMaskScreen> {
 
   void newEdit(){
     isNewEdits = true;
-    print(isNewEdits);
   }
 
-  ImagePainter createPainter(int clearedId){
-    return
-  }
+
 
 
 
 
   @override
   Widget build(BuildContext context) {
+    ImagePainter currentPainter = ImagePainter.asset(
+        widget.baseImagePath,
+        controlsAtTop: true,
+        scalable: true,
+        key: _imageKey,
+        //height: 500, //TODO make this a size that will work for every screen
+        width: MediaQuery.of(context).size.width,
+        brushIcon: const Icon(Icons.brush_outlined),
+        undoIcon: const Icon(Icons.undo),
+        clearAllIcon: const Icon(Icons.clear_all_sharp),
+        initialPaintMode: PaintMode.freeStyle,
+        initialStrokeWidth: 30,
+        initialColor: Colors.blueAccent,
+        onEdit: newEdit,
+        clearedID: 0
+    );
     return Scaffold(
       key: _key,
       appBar: AppBar(
@@ -122,29 +136,19 @@ class _DispAndMaskState extends State<DispAndMaskScreen> {
         children: [
           Flexible(
             flex: 3,
-            child: ImagePainter.asset(
-              widget.baseImagePath,
-              controlsAtTop: true,
-              scalable: true,
-              key: _imageKey,
-              //height: 500, //TODO make this a size that will work for every screen
-              width: MediaQuery.of(context).size.width,
-              brushIcon: const Icon(Icons.brush_outlined),
-              undoIcon: const Icon(Icons.undo),
-              clearAllIcon: const Icon(Icons.clear_all_sharp),
-              initialPaintMode: PaintMode.freeStyle,
-              initialStrokeWidth: 30,
-              initialColor: Colors.blueAccent,
-              onEdit: newEdit,
-            ),
+            child: currentPainter
           ),
           Flexible(
             child: Container(
               alignment: Alignment.center,
                 child: SizedBox(
                     child: TextButton(onPressed: (){
-                      saveImage();
-                      isNewEdits = false;
+                      setState(() {
+                        saveImage();
+                        isNewEdits = false;
+                        numClears++; ///increase the numClears so that a cleared image painter is constructed
+                        currentPainter.createState();
+                      });
                     }, child: const Text("Create New Card"))
                 )
             ),
