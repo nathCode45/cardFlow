@@ -95,6 +95,11 @@ class _DispAndMaskState extends State<DispAndMaskScreen> {
     print(isNewEdits);
   }
 
+  ImagePainter createPainter(int clearedId){
+    return
+  }
+
+
 
 
   @override
@@ -140,7 +145,7 @@ class _DispAndMaskState extends State<DispAndMaskScreen> {
                     child: TextButton(onPressed: (){
                       saveImage();
                       isNewEdits = false;
-                    }, child: Text("Save"))
+                    }, child: const Text("Create New Card"))
                 )
             ),
           )

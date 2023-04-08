@@ -173,7 +173,7 @@ packages:
     description:
       path: "."
       ref: HEAD
-      resolved-ref: d8d6a5714556533cd31ee2fbebb687e35cfd9bea
+      resolved-ref: "6b9240c959bb2cc3819edd16ef0d0ae48834cd92"
       url: "https://github.com/nathCode45/flutter_image_painter_fork"
     source: git
     version: "0.5.0"
