@@ -25,8 +25,8 @@ class LaunchDeck extends StatefulWidget {
 class _LaunchDeckState extends State<LaunchDeck> {
   late List<Flashcard> cards;
   bool isLoading = false;
-
-  var args;
+  late Deck args;
+  late int cardsDue;
 
   @override
   void initState() {
@@ -51,6 +51,8 @@ class _LaunchDeckState extends State<LaunchDeck> {
       isLoading = true;
     });
     cards = await args.getCards();
+    List<int> dueList = await args.getCardsDueIDs();
+    cardsDue = dueList.length;
 
     setState(() => isLoading = false);
   }
@@ -110,14 +112,17 @@ class _LaunchDeckState extends State<LaunchDeck> {
                             fontSize: 26.0, color: Colors.black, fontFamily: "Lexend"),
                         children: [
                       TextSpan(
-                          text: '${args.cardsDue} ',
+                          text: (isLoading)?"":'$cardsDue ',
                           style: TextStyle(fontWeight: FontWeight.bold)),
                       const TextSpan(text: 'Cards Due')
                     ]))),
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 32.0),
-              child: OutlinedButton(onPressed: (){
-                Navigator.push(context, MaterialPageRoute(builder: (context) => Learn(deck: args)));
+              child: OutlinedButton(onPressed: () async {
+                final value = await Navigator.push(context, MaterialPageRoute(builder: (context) => Learn(deck: args)));
+                setState(() {
+                  refreshCards();
+                });
               }, child: Text("Start Studying", style: TextStyle(fontFamily: "Lexend"),)),
             ),
             Expanded(

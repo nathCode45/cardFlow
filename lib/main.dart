@@ -19,19 +19,19 @@ void main() async {
   Data.instance.deleteDatabase();
   await Data.instance.deleteAllDecks();
   await Data.instance.deleteAllFlashcards();
-  print(await Data.instance.createDeck(Deck(name: "AP Calculus", cardsDue: 13, dateCreated: DateTime.now())));
+  print(await Data.instance.createDeck(Deck(name: "AP Calculus", dateCreated: DateTime.now())));
 
-  Deck southAmerica = await Data.instance.createDeck(Deck(name: "South American Capitals", cardsDue: 3, dateCreated: DateTime.now()));
+  Deck southAmerica = await Data.instance.createDeck(Deck(name: "South American Capitals", dateCreated: DateTime.now()));
   await Data.instance.createFlashcard(Flashcard.fromPlainText("Argentina", "Buenos Aires", deckID: southAmerica.id ));
   await Data.instance.createFlashcard(Flashcard.fromPlainText("Bolivia", "La Paz Sucre", deckID: southAmerica.id));
   await Data.instance.createFlashcard(Flashcard.fromPlainText("Brazil", "Brasilia", deckID: southAmerica.id));
   await Data.instance.createFlashcard(Flashcard.fromPlainText("Chile", "Santiago", deckID: southAmerica.id));
 
-  await Data.instance.createDeck(Deck(name: "AP Statistics Chapter 6 Equations", cardsDue: 3, dateCreated: DateTime.now()));
+  await Data.instance.createDeck(Deck(name: "AP Statistics Chapter 6 Equations", dateCreated: DateTime.now()));
 
-  await Data.instance.createDeck(Deck(name: "Anatomy of the brain", cardsDue: 7, dateCreated: DateTime.now()));
+  await Data.instance.createDeck(Deck(name: "Anatomy of the brain", dateCreated: DateTime.now()));
 
-  await Data.instance.createDeck(Deck(name: "Trigonometry Identities", cardsDue: 8, dateCreated: DateTime.now()));
+  await Data.instance.createDeck(Deck(name: "Trigonometry Identities", dateCreated: DateTime.now()));
 
   runApp(MaterialApp(
       initialRoute: '/',

@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:ffi';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -41,18 +40,20 @@ class _LearnState extends State<Learn> {
 
 
 
-  Flashcard? getLearnCard(){
+  Future<Flashcard?> getLearnCard() async {
     print("getLearnCard() called");
     int nearest = 0;
 
-    List<int> dueListIDs = []; //list of ids instead of entire cards, in order to save space
+    //List<int> dueListIDs = []; //list of ids instead of entire cards, in order to save space
 
-    for(int i = 0; i<cards.length; i++){
-      if(cards[i].nextReview.compareTo(DateTime.now()) < 0){
-        dueListIDs.add(cards[i].id!);
-        print("${cards[i].front} added to Due List");
-      }
-    }
+    // for(int i = 0; i<cards.length; i++){
+    //   if(cards[i].nextReview.compareTo(DateTime.now()) < 0){
+    //     dueListIDs.add(cards[i].id!);
+    //     print("${cards[i].front} added to Due List");
+    //   }
+    // }
+
+    List<int> dueListIDs = await widget.deck.getCardsDueIDs();
 
     if(dueListIDs.isNotEmpty) {
       for (int i = 0; i < dueListIDs.length; i++) {
@@ -94,7 +95,7 @@ class _LearnState extends State<Learn> {
     });
     cards = await widget.deck.getCards();
 
-    currentCard = getLearnCard();
+    currentCard = await getLearnCard();
 
     if(currentCard==null){
       setState(() {
@@ -297,7 +298,7 @@ class _LearnState extends State<Learn> {
 
             ): Container(),
 
-            Padding(
+            (reveal)?Padding(
               padding: const EdgeInsets.all(8.0),
               child: ElevatedButton(onPressed: ((){
                 setState(() {
@@ -316,6 +317,7 @@ class _LearnState extends State<Learn> {
 
 
                   Data.instance.updateFlashcard(currentCard!);
+                  Data.instance.createProgressRep(ProgressRep(dateTime: DateTime.now(), deckID: widget.deck.id!)); //record the progress
 
                   reveal = false;
 
@@ -325,7 +327,7 @@ class _LearnState extends State<Learn> {
                 });
 
               }), child: Icon(Icons.arrow_forward_ios_sharp)),
-            )
+            ):Container()
           ],
         )
 

@@ -13,7 +13,12 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   bool isLoading = false;
+  bool isProgressLoading = false;
   late List<Deck> decks;
+  List<int> cardsDueList = [];
+  int weeksBack = 0;
+  late List<int> numProgressPastWeek = [0,0,0,0,0,0,0];
+
   AppLifecycleState? _lastLifecycleState;
   final TextEditingController _addController = TextEditingController();
 
@@ -22,7 +27,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    refreshDecks();
+    refresh();
+    refreshWeeklyProgress();
   }
 
   @override
@@ -42,12 +48,45 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     }
   }
 
-  Future refreshDecks() async {
+  DateTime getDate(DateTime d) => DateTime(d.year, d.month, d.day);
+
+  Future refreshWeeklyProgress() async{ //returns a list of integers of the number of progress reps from that week
+    print("refresh Weekly Progress Called!");
+    //DateTime sunday = getDate(DateTime.now().subtract(Duration(days: DateTime.now().weekday-1)));
+    int dSubration;
+    if(DateTime.now().weekday==DateTime.sunday){
+      dSubration = 0;
+    }else{
+      dSubration = DateTime.now().weekday+1;
+    }
+    dSubration= dSubration + 7*weeksBack; //account for weeks back
+    DateTime sunday = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day - dSubration);
+    print("sunday: ${sunday.toString()}");
+    List<ProgressRep> weeklyProgressReps = await Data.instance.readProgress(sunday, sunday.add(const Duration(days: 6)));
+    print("WEEKLY REPS: $weeklyProgressReps");
+    numProgressPastWeek=[0,0,0,0,0,0,0]; //position 0 is sunday, position 6 is saturday
+    for(ProgressRep rep in weeklyProgressReps){
+      //datetime weekdays mondays are 1 and sundays are 7
+      if(rep.dateTime.weekday==DateTime.sunday){
+        numProgressPastWeek[0]++;
+      }else{
+        numProgressPastWeek[rep.dateTime.weekday]++;
+      }
+    }
+  }
+
+  Future refresh() async {
     setState(() {
       isLoading = true;
     });
 
-    this.decks = await Data.instance.readDecks();
+    decks = await Data.instance.readDecks();
+
+    cardsDueList = [];
+    for(Deck d in decks){
+      List<int> dueIDs = await d.getCardsDueIDs();
+      cardsDueList.add(dueIDs.length);
+    }
 
     setState(() => isLoading = false);
   }
@@ -75,10 +114,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                   if(_addController?.text!=null){
                     String? retrieved = _addController?.text;
                     Deck newDeck = Deck(name: retrieved!, dateCreated: DateTime.now());
-                    print(newDeck);
                     Data.instance.createDeck(newDeck);
                     setState(() {
-                      refreshDecks();
+                      refresh();
                     });
                     Navigator.of(context).pop();
                   }
@@ -110,14 +148,20 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           Text("🔥12", style: TextStyle(fontSize: 18),)
             ,),
           const Text(""),
-          Padding(
+          Row(
+            children: [
+              IconButton(onPressed: ()=>weeksBack--, icon: Icon(Icons.arrow_back_ios)),
+              IconButton(onPressed: ()=>weeksBack++, icon: Icon(Icons.arrow_forward_ios))
+            ],
+          )
+          ,Padding(
             padding: const EdgeInsets.all(8.0),
             child: AspectRatio(
               aspectRatio: 1.7,
               child: Card(elevation: 0,
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(4)),
-                child: _BarChart(),),
+                child: _BarChart(numWeeklyProgress: numProgressPastWeek,),),
 
             ),
           ),
@@ -135,45 +179,54 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   }
 
   Widget deckListBuilder() {
-    return ListView.builder(
-        shrinkWrap: true,
-        itemCount: decks.length,
-        itemBuilder: (context, index) {
-          return ListTile(
-            onTap: () {
-              Navigator.pushNamed(context, LaunchDeck.routeName, arguments: decks[index]);
-            },
-            contentPadding: const EdgeInsets.symmetric(
-                horizontal: 6, vertical: 18.0),
-            shape: const ContinuousRectangleBorder(
-                side: BorderSide(color: Colors.black12, width: 1)),
-            leading: Stack(
-                children: <Widget>[
-                  const Image(image: AssetImage('assets/deck_icon.png')),
-                  Positioned(
-                      bottom: 16,
-                      right: 23,
-                      child: SizedBox(
-                        width: 16,
-                        height: 16,
-                        child: FittedBox(
-                          fit: BoxFit.fitWidth,
-                          child: Text(decks[index].cardsDue.toString()),
-                        ),
-                      )
-                  ),
-                ]
-            ),
-            title: Text(decks[index].name),
-          );
-        }
+    return RefreshIndicator(
+      onRefresh: ()=>refresh(),
+      child: ListView.builder(
+          shrinkWrap: true,
+          itemCount: decks.length,
+          itemBuilder: (context, index) {
+            return ListTile(
+              onTap: () async {
+                final value = await Navigator.pushNamed(context, LaunchDeck.routeName, arguments: decks[index]);
+                setState(() {
+                  refresh();
+                  refreshWeeklyProgress();
+                  print("HOMESCREEN called");
+                });
+              },
+              contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 6, vertical: 18.0),
+              shape: const ContinuousRectangleBorder(
+                  side: BorderSide(color: Colors.black12, width: 1)),
+              leading: Stack(
+                  children: <Widget>[
+                    const Image(image: AssetImage('assets/deck_icon.png')),
+                    Positioned(
+                        bottom: 16,
+                        right: 23,
+                        child: SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: FittedBox(
+                            fit: BoxFit.fitWidth,
+                            child: Text(cardsDueList[index].toString()),
+                          ),
+                        )
+                    ),
+                  ]
+              ),
+              title: Text(decks[index].name),
+            );
+          }
+      ),
     );
   }
 }
 
 
 class _BarChart extends StatelessWidget {
-  const _BarChart({Key? key}) : super(key: key);
+  List<int> numWeeklyProgress;
+  _BarChart({Key? key, required this.numWeeklyProgress}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -246,15 +299,5 @@ class _BarChart extends StatelessWidget {
       topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false))
   );
 
-  List<BarChartGroupData>get barGroups => [
-    BarChartGroupData(x:0,barRods: [getRod(8)],),
-    BarChartGroupData(x:1,barRods: [getRod(10)],),
-    BarChartGroupData(x:2,barRods: [getRod(2)],),
-    BarChartGroupData(x:3,barRods: [getRod(9)],),
-    BarChartGroupData(x:4,barRods: [getRod(5)],),
-    BarChartGroupData(x:5,barRods: [getRod(6)],),
-    BarChartGroupData(x:6,barRods: [getRod(8)],),
-    
-
-  ];
+  List<BarChartGroupData>get barGroups => List.generate(7, (index) => BarChartGroupData(x: index, barRods: [getRod(numWeeklyProgress[index].toDouble())]));
 }

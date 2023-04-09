@@ -14,34 +14,46 @@ import 'package:intl/intl.dart';
 class Deck{
   int? id;
   String name;
-  int? cardsDue;
   DateTime? dateCreated;
 
 
 
-  Deck({required this.name, this.cardsDue =0, this.id, this.dateCreated});
+  Deck({required this.name, this.id, this.dateCreated});
 
   Map<String, dynamic> toMap(){
       return{
         'id': id,
         'name': name,
-        'cards_due' : cardsDue,
         'date_created' : dateCreated?.toIso8601String()
       };
   }
 
   @override
   String toString() {
-    return 'Deck{id: $id, name: $name, cards_due: $cardsDue, date_created: $dateCreated}';
+    return 'Deck{id: $id, name: $name, date_created: $dateCreated}';
   }
 
   Deck copy({int? id, String? name, int? cardsDue, DateTime? dateCreated}) {
-    return Deck(id: id ?? this.id, name: name ?? this.name, cardsDue: cardsDue ?? this.cardsDue, dateCreated: dateCreated ?? this.dateCreated);
+    return Deck(id: id ?? this.id, name: name ?? this.name, dateCreated: dateCreated ?? this.dateCreated);
   }
 
   Future<List<Flashcard>> getCards() async{
     return await Data.instance.readFlashcards(deckID: id);
   }
+
+  Future<List<int>> getCardsDueIDs() async{
+
+    List<Flashcard> cards = await getCards();
+    List<int> dueListIDs = []; //list of ids instead of entire cards, in order to save space
+
+    for(int i = 0; i<cards.length; i++){
+      if(cards[i].nextReview.compareTo(DateTime.now()) < 0){
+        dueListIDs.add(cards[i].id!);
+      }
+    }
+    return dueListIDs;
+  }
+
 }
 
 class Flashcard{
@@ -160,6 +172,29 @@ class Flashcard{
 }
 
 
+class ProgressRep{
+  DateTime dateTime;
+  int deckID;
+  int? id;
+
+  ProgressRep({required this.dateTime, required this.deckID, this.id});
+
+  Map<String, dynamic> toMap(){
+    var formatter = DateFormat('yyyy-MM-dd HH:mm:ss');
+    return{
+      'id': id,
+      'deckID': deckID,
+      'formattedDateTime': formatter.format(dateTime),
+    };
+
+  }
+
+  ProgressRep copy({int? id, int? deckID, DateTime? dateTime}) {
+    return ProgressRep(dateTime: dateTime?? this.dateTime, deckID: deckID?? this.deckID, id: id??this.id);
+  }
+
+}
+
 
 
 
@@ -207,8 +242,9 @@ class Data{
   }
 
   Future _createDB(Database db, int version) async {
-    db.execute('CREATE TABLE decks(id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, cards_due INTEGER NOT NULL, date_created TEXT)');
+    db.execute('CREATE TABLE decks(id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, date_created TEXT)');
     db.execute('CREATE TABLE flashcards(id INTEGER PRIMARY KEY AUTOINCREMENT, deckID INTEGER, front TEXT, back TEXT, formattedRevDate TEXT, repetitions INTEGER, eFactor INTEGER, isImage BIT)');
+    db.execute('CREATE TABLE progress(id INTEGER PRIMARY KEY AUTOINCREMENT, formattedDateTime TEXT, deckID INTEGER)');
   }
 
 
@@ -224,10 +260,16 @@ class Data{
     return flashcard.copy(id: id);
   }
 
+  Future<ProgressRep> createProgressRep(ProgressRep progressRep) async{
+    final db = await instance.database;
+    final id = await db.insert("progress", progressRep.toMap());
+    return progressRep.copy(id: id);
+  }
+
   //TODO this function will read all decks but not load the cards from it so that less has to load
   Future<List<Deck>> readDecks() async {
     final db = await instance.database;
-    final List<Map<String, dynamic>> maps = await db.query('decks', columns: ['id', 'name', 'cards_due']);
+    final List<Map<String, dynamic>> maps = await db.query('decks', columns: ['id', 'name']);
     print("maps");
     print(maps);
 
@@ -237,8 +279,7 @@ class Data{
               (int i){
             return Deck(
                 id: maps[i]['id'],
-                name: maps[i]['name'],
-                cardsDue: maps[i]['cards_due'],
+                name: maps[i]['name']
             );
           }
       );
@@ -262,8 +303,24 @@ class Data{
           deckID: maps[i]['deckID'], nextReview: DateFormat('yyyy-MM-dd HH:mm:ss').parse(maps[i]['formattedRevDate']), eFactor: maps[i]['eFactor'],
         isImage: maps[i]['isImage']==1, repetitions: maps[i]['repetitions']),);
     }else{
-      throw Exception('no cards were found');
+      //throw Exception('no cards were found');
+      return [];
     }
+  }
+
+  Future<List<ProgressRep>> readProgress(DateTime startDate, DateTime endDate) async{
+    String startDateFormatted = DateFormat('yyyy-MM-dd HH:mm:ss').format(startDate);
+    String endDateFormatted = DateFormat('yyyy-MM-dd HH:mm:ss').format(endDate);
+    final db = await instance.database;
+    final List<Map<String, dynamic>> maps;
+    maps = await db.query('progress', columns: ['id', 'formattedDateTime', 'deckID'], where: 'formattedDateTime between ? and ?', whereArgs: [startDateFormatted, endDateFormatted]);
+
+    if(maps.isNotEmpty){
+      return List.generate(maps.length, (int i) => ProgressRep(dateTime: DateFormat('yyyy-MM-dd HH:mm:ss').parse(maps[i]['formattedDateTime']), deckID: maps[i]['deckID'], id: maps[i]['id']));
+    }else{
+      return [];
+    }
+
   }
 
   //TODO this function will read one specific deck including the cards in it
@@ -275,7 +332,6 @@ class Data{
       return Deck(
           id: maps[id]['id'],
           name: maps[id]['name'],
-          cardsDue: maps[id]['cardsDue'],
           dateCreated: maps[id]['dateCreated']
       );
     }else{
@@ -329,6 +385,11 @@ class Data{
 
     await db.delete('flashcards', where: null); //passing null to where just deletes all rows
 
+  }
+
+  Future deleteAllProgress() async{
+    final db = await instance.database;
+    await db.delete('progress', where: null);
   }
 
 
