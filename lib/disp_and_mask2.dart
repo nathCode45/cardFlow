@@ -38,6 +38,7 @@ class _DispAndMaskState extends State<DispAndMaskScreen> {
   void initState() {
     // TODO: implement initState
     super.initState();
+    //isNewEdits = false;
   }
 
   void saveImage() async{
@@ -115,17 +116,22 @@ class _DispAndMaskState extends State<DispAndMaskScreen> {
         initialPaintMode: PaintMode.freeStyle,
         initialStrokeWidth: 30,
         initialColor: Colors.blueAccent,
-        onEdit: newEdit,
+        onEdit: (){isNewEdits = true; print("NEW EDIT $isNewEdits");},
         clearedID: 0
     );
     return Scaffold(
       key: _key,
       appBar: AppBar(
-        leading: IconButton(icon: const Icon(Icons.arrow_back_ios_new),
-          onPressed: ()=>(isNewEdits)?
-            _showExitDialog():
-            Navigator.pushNamedAndRemoveUntil(context, LaunchDeck.routeName, ModalRoute.withName('/'), arguments: widget.deck)
-          ,),
+        leading: Padding(
+          padding: const EdgeInsets.fromLTRB(4,0,0,0),
+          child: TextButton(child: const Text("Done", style: TextStyle(color: Colors.white),),
+            onPressed: ()=>Navigator.pushNamedAndRemoveUntil(context, LaunchDeck.routeName, ModalRoute.withName('/'), arguments: widget.deck)),
+        ),
+          // onPressed: (){
+          // (isNewEdits)?
+          //   _showExitDialog():
+          //   Navigator.pushNamedAndRemoveUntil(context, LaunchDeck.routeName, ModalRoute.withName('/'), arguments: widget.deck);
+          // }),
         actions: [
           //IconButton(onPressed: (){saveImage();}, icon: const Icon(Icons.save))
         ],
@@ -145,9 +151,12 @@ class _DispAndMaskState extends State<DispAndMaskScreen> {
                     child: TextButton(onPressed: (){
                       setState(() {
                         saveImage();
-                        isNewEdits = false;
-                        numClears++; ///increase the numClears so that a cleared image painter is constructed
-                        currentPainter.createState();
+
+                        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>DispAndMaskScreen(baseImagePath: widget.baseImagePath, deck: widget.deck)));
+
+                        // isNewEdits = false;
+                        // numClears++; ///increase the numClears so that a cleared image painter is constructed
+                        // currentPainter.createState();
                       });
                     }, child: const Text("Create New Card"))
                 )
@@ -156,5 +165,6 @@ class _DispAndMaskState extends State<DispAndMaskScreen> {
         ],
       ),
     );
+
   }
 }

@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:card_flow/launch_deck.dart';
 import 'package:sqflite/sqflite.dart';
 
 import 'package:card_flow/deck_data.dart';
@@ -48,6 +49,7 @@ class _CardEditState extends State<CardEdit> {
   Map<int, String> deckDropMap={};
 
   var args;
+  late bool isExistingCard;
 
 
 
@@ -70,6 +72,19 @@ class _CardEditState extends State<CardEdit> {
     setState(() => isLoading = false);
   }
 
+  String _shorten(String str){
+    const int CHARACTER_LIMIT = 20;
+    String singleLine = str.replaceAll("\n", " ");
+    if (singleLine.length>CHARACTER_LIMIT){
+      return '${singleLine.substring(0, CHARACTER_LIMIT)}...';
+    }else{
+      return singleLine;
+    }
+
+  }
+
+  String _decodeCardTitle(Flashcard input)=> _shorten(NotusDocument.fromJson(jsonDecode(input.front)).toPlainText());
+
 
   @override
   void initState() {
@@ -85,142 +100,191 @@ class _CardEditState extends State<CardEdit> {
     _controller2 = ZefyrController();
   }
 
+  Future<void> _showDeleteDialog() async{
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context){
+        return AlertDialog(
+          title: const Text("Are you sure you want to delete this card?"),
+          content: const SingleChildScrollView(
+              child: Text("This action cannot be undone.")
+          ),
+          actions: [
+            TextButton(
+              autofocus: true,
+                onPressed: (){
+              Navigator.of(context).pop();
+            }, child: const Text("NO", style: TextStyle(fontWeight: FontWeight.bold),)),
+            TextButton(onPressed: (){
+              String name = _shorten(NotusDocument.fromJson(jsonDecode(args.card.front)).toPlainText());
+              Data.instance.deleteFlashcard(args.card.id);
+              ScaffoldMessenger.of(context)
+                  .showSnackBar(SnackBar(content: Text('Deleted $name')));
+              Navigator.popUntil(context, ModalRoute.withName(LaunchDeck.routeName));
+            }, child: Text("YES")),
+
+
+          ],
+        );
+      }
+    );
+  }
+
+
   @override
   Widget build(BuildContext context) {
     args = ModalRoute.of(context)!.settings.arguments as CardEditScreenArguments;
+    print(args.card?.front);
+    isExistingCard = (args.card?.front != null && args.card?.front!="");
 
-    if (args.card == null) {
-      args.card = Flashcard("", "", id: 1);
+    args.card ??= Flashcard("", "", id: 1);
+
+    if(isExistingCard){
+      print("It is an existing card!");
+      setState(() {
+        _controller = ZefyrController(NotusDocument.fromJson(jsonDecode(args.card.front)));
+        _controller2 = ZefyrController(NotusDocument.fromJson(jsonDecode(args.card.back)));
+      });
     }
     return Scaffold(
         appBar: AppBar(
           title: Text(
-            args.card!.front,
+            (isExistingCard)? _decodeCardTitle(args.card) : args.card!.front,
             style: const TextStyle(fontFamily: 'Lexend'),
           ),
         ),
         backgroundColor: Colors.white,
         body: Padding(
           padding: const EdgeInsets.all(8.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Center(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text("Deck: ", style: TextStyle(
-                        fontSize: 16.0,
-                        color: Colors.black,
-                        fontFamily: "Lexend",
-                        fontWeight: FontWeight.bold)),
-                    isLoading? const Center(child: CircularProgressIndicator()) : DropdownButton<int>(
-                        value: args.selectedDeckID,
-                        items:
-                        deckDropMap.keys.toList().map<DropdownMenuItem<int>>((int idv){
-                          print("current decks: ${decks}");
-                          return DropdownMenuItem<int>(value: idv, child: Text(deckDropMap[idv]!, style: const TextStyle(
-                              fontSize: 16.0, color: Colors.black, fontFamily: "Lexend")));
-                        }
-                        ).toList(),
-                        onChanged: (int? idv) {
-                          setState(() {
-                            args.selectedDeckID = idv!;
-                          });
-                        }
-                    )
-                    // DeckListDropdown(initialSelectedDeck: widget.selectedDeck!)
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text("Deck: ", style: TextStyle(
+                          fontSize: 16.0,
+                          color: Colors.black,
+                          fontFamily: "Lexend",
+                          fontWeight: FontWeight.bold)),
+                      isLoading? const Center(child: CircularProgressIndicator()) : DropdownButton<int>(
+                          value: args.selectedDeckID,
+                          items:
+                          deckDropMap.keys.toList().map<DropdownMenuItem<int>>((int idv){
+                            return DropdownMenuItem<int>(value: idv, child: Text(deckDropMap[idv]!, style: const TextStyle(
+                                fontSize: 16.0, color: Colors.black, fontFamily: "Lexend")));
+                          }
+                          ).toList(),
+                          onChanged: (int? idv) {
+                            setState(() {
+                              args.selectedDeckID = idv!;
+                            });
+                          }
+                      )
+                      // DeckListDropdown(initialSelectedDeck: widget.selectedDeck!)
 
-                  ],
-                ),
-              )
-              , const Text("Front", style: TextStyle(
-                  fontSize: 26.0, color: Colors.black, fontFamily: "Lexend")),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: ZefyrToolbar.basic(controller: _controller!),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Center(child: Container(decoration: BoxDecoration(
-                    border: Border.all(width: 1.0, color: Colors.black)), child:
-                Padding(
-                  padding: const EdgeInsets.only(left: 8),
-                  child: ZefyrEditor(controller: _controller!
-                    ,),
-                ))),
-              ),
-              SizedBox(height: 50,),
-              const Text("Back", style: TextStyle(
-                  fontSize: 26.0, color: Colors.black, fontFamily: "Lexend")),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: ZefyrToolbar.basic(controller: _controller2!),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Center(child: Container(decoration: BoxDecoration(
-                    border: Border.all(width: 1.0, color: Colors.black)), child:
-                Padding(
-                  padding: const EdgeInsets.only(left: 8),
-                  child: ZefyrEditor(controller: _controller2!
-                    ,),
-                ))),
-              ),
-              Center(
-                child: Container(
-                  width: 125,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      _saveDocument(context);
-                    },
-                    child: Row(
-                      mainAxisSize: MainAxisSize.max,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: const [
-                        Icon(Icons.save),
-                        SizedBox(width: 8,),
-                        Text("Save"),
-                      ],
-                    ),
+                    ],
                   ),
+                )
+                , const Text("Front", style: TextStyle(
+                    fontSize: 26.0, color: Colors.black, fontFamily: "Lexend")),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: ZefyrToolbar.basic(controller: _controller!),
                 ),
-              ),
-              Center(
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Center(child: Container(decoration: BoxDecoration(
+                      border: Border.all(width: 1.0, color: Colors.black)), child:
+                  Padding(
+                    padding: const EdgeInsets.only(left: 8),
+                    child: ZefyrEditor(controller: _controller!
+                      ,),
+                  ))),
+                ),
+                SizedBox(height: 50,),
+                const Text("Back", style: TextStyle(
+                    fontSize: 26.0, color: Colors.black, fontFamily: "Lexend")),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: ZefyrToolbar.basic(controller: _controller2!),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Center(child: Container(decoration: BoxDecoration(
+                      border: Border.all(width: 1.0, color: Colors.black)), child:
+                  Padding(
+                    padding: const EdgeInsets.only(left: 8),
+                    child: ZefyrEditor(controller: _controller2!
+                      ,),
+                  ))),
+                ),
+                Center(
                   child: Container(
                     width: 125,
                     child: ElevatedButton(
-                      style: ButtonStyle(
-                          backgroundColor: MaterialStateProperty.all<Color>(
-                              Colors.grey[400]!),
-                          foregroundColor: MaterialStateProperty.all<Color>(
-                              Colors.white)
-                      ),
                       onPressed: () {
-
+                        print("Is it an existing card? $isExistingCard");
+                        _saveDocument(context, isExistingCard);
                       },
                       child: Row(
                         mainAxisSize: MainAxisSize.max,
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: const [
-                          Icon(Icons.delete),
+                          Icon(Icons.save),
                           SizedBox(width: 8,),
-                          Text("Delete"),
+                          Text("Save"),
                         ],
                       ),
                     ),
-                  )
-              )
-            ],
+                  ),
+                ),
+                (isExistingCard)?Center(
+                    child: Container(
+                      width: 125,
+                      child: ElevatedButton(
+                        style: ButtonStyle(
+                            backgroundColor: MaterialStateProperty.all<Color>(
+                                Colors.grey[400]!),
+                            foregroundColor: MaterialStateProperty.all<Color>(
+                                Colors.white)
+                        ),
+                        onPressed: ()=>_showDeleteDialog(),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.max,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: const [
+                            Icon(Icons.delete),
+                            SizedBox(width: 8,),
+                            Text("Delete"),
+                          ],
+                        ),
+                      ),
+                    )
+                ):Container()
+              ],
+            ),
           ),
         )
     );
   }
 
-  void _saveDocument(BuildContext context) async {
+  void _saveDocument(BuildContext context, bool isExistingCard) async {
     final contents = jsonEncode(_controller!.document);
     final contents2 = jsonEncode(_controller2!.document);
-    await Data.instance.createFlashcard(Flashcard(contents, contents2, deckID: args.selectedDeckID));
+
+    if(!isExistingCard) {
+      await Data.instance.createFlashcard(
+          Flashcard(contents, contents2, deckID: args.selectedDeckID));
+    }else{
+      args.card.front = contents;
+      args.card.back = contents2;
+      await Data.instance.updateFlashcard(args.card);
+    }
+
     ScaffoldMessenger.of(context)
         .showSnackBar(SnackBar(content: Text('Saved.')));
 

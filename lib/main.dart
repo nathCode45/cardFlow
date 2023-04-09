@@ -8,6 +8,7 @@ import 'package:zefyrka/zefyrka.dart';
 import 'package:card_flow/home_screen.dart';
 import 'card_edit_screen.dart';
 import 'deck_data.dart';
+import 'image_card_view_screen.dart';
 
 void main() async {
 
@@ -39,6 +40,7 @@ void main() async {
         '/': (context) => const HomeScreen(),
         LaunchDeck.routeName: (context)=> const LaunchDeck(),
         CardEdit.routeName: (context)=> const CardEdit(),
+        ImageCardViewScreen.routeName: (context)=>const ImageCardViewScreen()
         //'/launch_deck': (context) => const LaunchDeck(deck: decks,)),
       }
   ),

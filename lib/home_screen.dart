@@ -15,6 +15,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   bool isLoading = false;
   late List<Deck> decks;
   AppLifecycleState? _lastLifecycleState;
+  final TextEditingController _addController = TextEditingController();
 
 
   @override
@@ -51,10 +52,53 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     setState(() => isLoading = false);
   }
 
+  Future<void> _showCreateDeckDialog(){
+
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: true,
+      builder: (context){
+        return AlertDialog(
+          title: Text("Create new deck"),
+          content: SingleChildScrollView(
+            child:
+            Column(
+              children: [
+                TextField(
+                  onChanged: (value){
+
+                  },
+                  controller: _addController,
+                  decoration: InputDecoration(hintText: "Enter deck name here"),
+                ),
+                TextButton(onPressed: (){
+                  if(_addController?.text!=null){
+                    String? retrieved = _addController?.text;
+                    Deck newDeck = Deck(name: retrieved!, dateCreated: DateTime.now());
+                    print(newDeck);
+                    Data.instance.createDeck(newDeck);
+                    setState(() {
+                      refreshDecks();
+                    });
+                    Navigator.of(context).pop();
+                  }
+
+                }, child: Text("Create"))
+              ],
+            ),
+          )
+        );
+      }
+    );
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       backgroundColor: Colors.white,
+      floatingActionButton: FloatingActionButton(onPressed: ()=>_showCreateDeckDialog(),child: Icon(Icons.add),),
       body: Center(child:
       Column(
         children: [

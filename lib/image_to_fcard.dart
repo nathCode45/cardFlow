@@ -43,60 +43,70 @@ class _ImageCardScreenState extends State<ImageCardScreen> {
     super.dispose();
   }
 
+
+
   @override
   Widget build(BuildContext context) {
+    final List<Widget> _camChildren = [
+      FutureBuilder<void>(
+        future: _initializeControllerFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.done) {
+            return CameraPreview(_controller);
+          } else {
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
+          }
+        },
+      ),
+      Expanded(
+          child: Center(
+            child: ElevatedButton(
+              onPressed: () async {
+                try {
+                  await _initializeControllerFuture;
+
+                  final image = await _controller.takePicture();
+
+                  if (!mounted) return;
+                  await Navigator.of(context).pushReplacement(MaterialPageRoute(
+                      builder: (context) => DispAndMaskScreen(
+                        baseImagePath: image.path,
+                        deck: widget.deck,
+                      )));
+                } catch (e) {
+                  print(e);
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.white,
+                  shape: const CircleBorder()
+              ),
+              child: const Padding(
+                padding: EdgeInsets.all(16.0),
+                child: Icon(
+                  size: 32 ,
+                  Icons.camera_alt,
+                  color: Colors.black,
+                ),
+              ),
+            ),
+          )
+      )
+    ];
+
+
     return Scaffold(
       backgroundColor: Colors.black12,
       appBar: AppBar(backgroundColor: Colors.black12,),
-      body: Column(
-        children: [
-          FutureBuilder<void>(
-            future: _initializeControllerFuture,
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.done) {
-                return CameraPreview(_controller);
-              } else {
-                return const Center(
-                  child: CircularProgressIndicator(),
-                );
-              }
-            },
-          ),
-          Expanded(
-            child: Center(
-              child: ElevatedButton(
-                onPressed: () async {
-                  try {
-                    await _initializeControllerFuture;
-
-                    final image = await _controller.takePicture();
-
-                    if (!mounted) return;
-                    await Navigator.of(context).pushReplacement(MaterialPageRoute(
-                        builder: (context) => DispAndMaskScreen(
-                          baseImagePath: image.path,
-                          deck: widget.deck,
-                        )));
-                  } catch (e) {
-                    print(e);
-                  }
-                  },
-                  style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      shape: const CircleBorder()
-              ),
-                  child: const Padding(
-                    padding: EdgeInsets.all(16.0),
-                    child: Icon(
-                      size: 32 ,
-                      Icons.camera_alt,
-                      color: Colors.black,
-                    ),
-                  ),
-              ),
-            )
-          )
-        ],
+      body: OrientationBuilder(
+        builder: (BuildContext context, Orientation orientation) {
+          return (orientation==Orientation.portrait)? Column(
+            children: _camChildren
+          ):
+          Row(children: _camChildren);
+        },
       ),
 
     );

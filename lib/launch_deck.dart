@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:camera/camera.dart';
 import 'package:card_flow/card_edit_screen.dart';
+import 'package:card_flow/image_card_view_screen.dart';
 import 'package:card_flow/image_to_fcard.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -152,10 +153,23 @@ class _LaunchDeckState extends State<LaunchDeck> {
                 alignment: Alignment.topLeft,
                 child: SizedBox(
                   width: 50,
-                    height: 100,
+                    height: 50,
                     child: Image.memory(base64Decode(cards[index].front)) //TODO load the image in a lower resolution
                 ),
               ),
+              onTap: (cards[index].isImage==null ||(cards[index].isImage!=null && cards[index].isImage==false))?
+              () async {
+                await Navigator.pushNamed(context, CardEdit.routeName, arguments: CardEditScreenArguments(selectedDeckID: args.id!, card: cards[index]));
+                setState(() {
+                  refreshCards();
+                });
+              }:
+                  ()async {
+                    await Navigator.pushNamed(context, ImageCardViewScreen.routeName, arguments: cards[index]);
+                    setState(() {
+                      refreshCards();
+                    });
+                  }
             );
           }else{
             return Container();
