@@ -23,6 +23,7 @@ class _LearnState extends State<Learn> {
   bool reveal = false;
   bool isLoading = false;
   bool isCardsDue = false;
+  bool isImage = false;
 
   late ZefyrController? _controllerFront = ZefyrController();
   late ZefyrController? _controllerBack = ZefyrController();
@@ -100,19 +101,26 @@ class _LearnState extends State<Learn> {
         isCardsDue = false;
       });
     }else{
-      _loadDocument(currentCard!.front).then((document){
-        setState(() {
-          _controllerFront = ZefyrController(document);
+      Flashcard finalCard = currentCard!;
+      if(finalCard.isImage){
+        isImage = true;
+      }else{
+        isImage =false;
+        _loadDocument(currentCard!.front).then((document){
+          setState(() {
+            _controllerFront = ZefyrController(document);
+          });
         });
-      });
 
-      _loadDocument(currentCard!.back).then(
-              (document){
-            setState(() {
-              _controllerBack = ZefyrController(document);
-            });
-          }
-      );
+        _loadDocument(currentCard!.back).then(
+                (document){
+              setState(() {
+                _controllerBack = ZefyrController(document);
+              });
+            }
+        );
+      }
+
 
       setState(() {
         isCardsDue = true;
@@ -122,6 +130,30 @@ class _LearnState extends State<Learn> {
 
     setState(() => isLoading = false);
 
+  }
+
+  Widget cardSide(String? side){
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Container(
+        clipBehavior: Clip.hardEdge,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(15),
+          color: const Color(0xFF000000),
+          border: Border.all(color: Colors.black26, width: 2),
+        ),
+        child: Center(
+            child: InteractiveViewer(
+              maxScale: 10,
+              clipBehavior: Clip.none,
+              child: Image.memory(
+                base64Decode(side!),
+                fit: BoxFit.fitWidth,
+              ),
+            )
+        ),
+      ),
+    );
   }
 
 
@@ -156,20 +188,24 @@ class _LearnState extends State<Learn> {
           children: [
             Padding(
               padding: const EdgeInsets.all(16.0),
-              child: Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(15),
-                  color: Colors.white,
-                  border: Border.all(color: Colors.black26, width: 2),
-                ),
-                child: Center(
-                  child: (_controllerFront == null) ?
-                  const Center(child: CircularProgressIndicator(),)
-                      : ZefyrEditor(controller: _controllerFront!, readOnly: true, padding: const EdgeInsets.all(16), showCursor: false,),
-                ),
+              child: Center(
+                child: (isImage)?
+                    cardSide((reveal)?currentCard?.back:currentCard?.front)
+                  :
+
+                  Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(15),
+                      color: Colors.white,
+                      border: Border.all(color: Colors.black26, width: 2),
+                    ),
+                    child: (_controllerFront == null) ?
+                    const Center(child: CircularProgressIndicator(),)
+                        : ZefyrEditor(controller: _controllerFront!, readOnly: true, padding: const EdgeInsets.all(16), showCursor: false,),
+                  ),
               ),
             ),
-            (reveal) ? Padding(
+            (reveal && !isImage) ? Padding(
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
               child: Container(
                 decoration: BoxDecoration(

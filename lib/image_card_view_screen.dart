@@ -3,6 +3,9 @@ import 'dart:convert';
 import 'package:card_flow/deck_data.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:zefyrka/zefyrka.dart';
+
+import 'launch_deck.dart';
 
 class ImageCardViewScreen extends StatefulWidget {
   const ImageCardViewScreen({Key? key}) : super(key: key);
@@ -55,7 +58,14 @@ class _ImageCardViewScreenState extends State<ImageCardViewScreen> {
                 foregroundColor: MaterialStateProperty.all<Color>(
                     Colors.white)
             ),
-            onPressed: (){},
+            onPressed: (){
+              print("pressed");
+              String name = "Image";
+              Data.instance.deleteFlashcard(flashcard.id!);
+              ScaffoldMessenger.of(context)
+                  .showSnackBar(SnackBar(content: Text('Deleted $name')));
+              Navigator.popUntil(context, ModalRoute.withName(LaunchDeck.routeName));
+            },
             child: Row(
               mainAxisSize: MainAxisSize.max,
               mainAxisAlignment: MainAxisAlignment.center,

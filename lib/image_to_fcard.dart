@@ -47,68 +47,82 @@ class _ImageCardScreenState extends State<ImageCardScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final List<Widget> _camChildren = [
-      FutureBuilder<void>(
-        future: _initializeControllerFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.done) {
-            return CameraPreview(_controller);
-          } else {
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
-          }
-        },
-      ),
-      Expanded(
-          child: Center(
-            child: ElevatedButton(
-              onPressed: () async {
-                try {
-                  await _initializeControllerFuture;
+    List<Widget> _camChildren (bool portrait){
+      return[
+        (portrait)?const SizedBox(height: 0,):
+        Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+            children: [SizedBox(height: 8,),IconButton(onPressed: ()=>Navigator.of(context).pop(), icon: Icon(Icons.arrow_back_ios_new, color: Colors.white,))]
+        ),
 
-                  final image = await _controller.takePicture();
+        FutureBuilder<void>(
+          future: _initializeControllerFuture,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.done) {
+              return CameraPreview(_controller);
+            } else {
+              return const Center(
+                child: CircularProgressIndicator(),
+              );
+            }
+          },
+        ),
+        Expanded(
+            child: Center(
+              child: ElevatedButton(
+                onPressed: () async {
+                  try {
+                    await _initializeControllerFuture;
 
-                  if (!mounted) return;
-                  await Navigator.of(context).pushReplacement(MaterialPageRoute(
-                      builder: (context) => DispAndMaskScreen(
-                        baseImagePath: image.path,
-                        deck: widget.deck,
-                      )));
-                } catch (e) {
-                  print(e);
-                }
-              },
-              style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.white,
-                  shape: const CircleBorder()
-              ),
-              child: const Padding(
-                padding: EdgeInsets.all(16.0),
-                child: Icon(
-                  size: 32 ,
-                  Icons.camera_alt,
-                  color: Colors.black,
+                    final image = await _controller.takePicture();
+
+                    if (!mounted) return;
+                    await Navigator.of(context).pushReplacement(MaterialPageRoute(
+                        builder: (context) => DispAndMaskScreen(
+                          baseImagePath: image.path,
+                          deck: widget.deck,
+                        )));
+                  } catch (e) {
+                    print(e);
+                  }
+                },
+                style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    shape: const CircleBorder()
+                ),
+                child: const Padding(
+                  padding: EdgeInsets.all(16.0),
+                  child: Icon(
+                    size: 32 ,
+                    Icons.camera_alt,
+                    color: Colors.black,
+                  ),
                 ),
               ),
-            ),
-          )
-      )
-    ];
+            )
+        )
+      ];
+    }
 
 
-    return Scaffold(
-      backgroundColor: Colors.black12,
-      appBar: AppBar(backgroundColor: Colors.black12,),
-      body: OrientationBuilder(
+    return OrientationBuilder(
         builder: (BuildContext context, Orientation orientation) {
-          return (orientation==Orientation.portrait)? Column(
-            children: _camChildren
-          ):
-          Row(children: _camChildren);
+          return
+          Scaffold(
+            backgroundColor: Colors.black12,
+            appBar: (orientation==Orientation.portrait)?AppBar(backgroundColor: Colors.black12,):null,
+            body: (orientation==Orientation.portrait)?
+            SafeArea(
+              child: Column(
+                children: _camChildren(true)
+              ),
+            ):SafeArea(child: Row(
+                children: _camChildren(false)
+            )),
+          );
         },
-      ),
-
     );
+
+
   }
 }

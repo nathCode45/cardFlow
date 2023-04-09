@@ -49,7 +49,7 @@ class Flashcard{
   String front;
   String back;
   int? deckID;
-  bool? isImage = false;
+  bool isImage = false;
 
   double eFactor;
   int repetitions;
@@ -57,13 +57,13 @@ class Flashcard{
 
   static const double INITIAL_EFACTOR = 1.5;//2.5;
 
-  Flashcard(this.front, this.back, {this.id, this.deckID, this.isImage}):
+  Flashcard(this.front, this.back, {this.id, this.deckID, this.isImage=false}):
     nextReview = DateTime.now(),
     eFactor = INITIAL_EFACTOR,//2.5,
     repetitions = 1; //repetitions cannot be zero
-  Flashcard.withData(this.front, this.back, {this.id, this.deckID, required this.nextReview, required this.eFactor, required this.repetitions, this.isImage});
+  Flashcard.withData(this.front, this.back, {this.id, this.deckID, required this.nextReview, required this.eFactor, required this.repetitions, this.isImage=false});
 
-  Flashcard.fromPlainText(String plainFront, String plainBack, {this.id, this.deckID, this.isImage}):
+  Flashcard.fromPlainText(String plainFront, String plainBack, {this.id, this.deckID, this.isImage=false}):
     front = jsonEncode(NotusDocument().insert(0, '$plainFront\n')),
     back = jsonEncode(NotusDocument().insert(0, '$plainBack\n')),
     nextReview = DateTime.now(),
