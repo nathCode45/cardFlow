@@ -19,6 +19,8 @@ void main() async {
   Data.instance.deleteDatabase();
   await Data.instance.deleteAllDecks();
   await Data.instance.deleteAllFlashcards();
+  await Data.instance.deleteAllProgress();
+
   print(await Data.instance.createDeck(Deck(name: "AP Calculus", dateCreated: DateTime.now())));
 
   Deck southAmerica = await Data.instance.createDeck(Deck(name: "South American Capitals", dateCreated: DateTime.now()));
@@ -32,6 +34,33 @@ void main() async {
   await Data.instance.createDeck(Deck(name: "Anatomy of the brain", dateCreated: DateTime.now()));
 
   await Data.instance.createDeck(Deck(name: "Trigonometry Identities", dateCreated: DateTime.now()));
+
+  for(int i =0; i<3; i++){
+    await Data.instance.createProgressRep(ProgressRep(dateTime: DateTime(2023, 4, 6), deckID: 0));
+  }
+  for(int i =0; i<2; i++){
+    await Data.instance.createProgressRep(ProgressRep(dateTime: DateTime(2023, 4, 4), deckID: 0));
+  }
+  for(int i =0; i<6; i++){
+    await Data.instance.createProgressRep(ProgressRep(dateTime: DateTime(2023, 4, 7), deckID: 0));
+  }
+  for(int i =0; i<3; i++){
+    await Data.instance.createProgressRep(ProgressRep(dateTime: DateTime(2023, 3, 28), deckID: 0));
+  }
+  for(int i =0; i<8; i++){
+    await Data.instance.createProgressRep(ProgressRep(dateTime: DateTime(2023, 4, 10), deckID: 0));
+  }
+  for(int i =0; i<6; i++){
+    await Data.instance.createProgressRep(ProgressRep(dateTime: DateTime(2023, 4, 13), deckID: 0));
+  }
+  for(int i =0; i<3; i++){
+    await Data.instance.createProgressRep(ProgressRep(dateTime: DateTime(2023, 4, 9), deckID: 0));
+  }
+  for(int i =0; i<10; i++){
+    await Data.instance.createProgressRep(ProgressRep(dateTime: DateTime(2023, 4, 15), deckID: 0));
+  }
+
+
 
   runApp(MaterialApp(
       initialRoute: '/',

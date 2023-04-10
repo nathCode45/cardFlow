@@ -1,7 +1,11 @@
+import 'dart:math';
+
 import 'package:card_flow/launch_deck.dart';
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:card_flow/deck_data.dart';
+
+
 
 
 class HomeScreen extends StatefulWidget {
@@ -12,10 +16,12 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
+  static const List months = ['Jan', 'February', 'March', "April", 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
   bool isLoading = false;
   bool isProgressLoading = false;
   late List<Deck> decks;
   List<int> cardsDueList = [];
+  late DateTime sunday;
   int weeksBack = 0;
   late List<int> numProgressPastWeek = [0,0,0,0,0,0,0];
 
@@ -60,7 +66,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       dSubration = DateTime.now().weekday+1;
     }
     dSubration= dSubration + 7*weeksBack; //account for weeks back
-    DateTime sunday = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day - dSubration);
+    sunday = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day - dSubration);
     print("sunday: ${sunday.toString()}");
     List<ProgressRep> weeklyProgressReps = await Data.instance.readProgress(sunday, sunday.add(const Duration(days: 6)));
     print("WEEKLY REPS: $weeklyProgressReps");
@@ -90,6 +96,28 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
     setState(() => isLoading = false);
   }
+
+  void dateBack(){
+    setState(() {
+      weeksBack++;
+      refreshWeeklyProgress();
+    });
+  }
+  void dateForward(){
+    if(daysBetween(DateTime.now(), sunday)<0) {
+      setState(() {
+        weeksBack--;
+        refreshWeeklyProgress();
+      });
+    }
+  }
+
+  int daysBetween(DateTime from, DateTime to) {
+    from = DateTime(from.year, from.month, from.day);
+    to = DateTime(to.year, to.month, to.day);
+    return (to.difference(from).inHours / 24).round();
+  }
+
 
   Future<void> _showCreateDeckDialog(){
 
@@ -141,7 +169,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       Column(
         children: [
           const Padding(
-            padding: EdgeInsets.fromLTRB(0, 100, 0, 0),
+            padding: EdgeInsets.fromLTRB(0, 75, 0, 0),
             child: Image(image: AssetImage('assets/cflow_logo.png')),
           ),
           const Padding(padding: EdgeInsets.fromLTRB(0, 0, 0, 16), child:
@@ -149,21 +177,95 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             ,),
           const Text(""),
           Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.max,
             children: [
-              IconButton(onPressed: ()=>weeksBack--, icon: Icon(Icons.arrow_back_ios)),
-              IconButton(onPressed: ()=>weeksBack++, icon: Icon(Icons.arrow_forward_ios))
+              // Padding(
+              //   padding: EdgeInsets.symmetric(horizontal: 8),
+              //   child: SizedBox(
+              //     width: 50,
+              //     child: ElevatedButton(
+              //     onPressed: (){
+              //       dateBack();
+              //     }, child: Center(child: Icon(Icons.arrow_back_ios, size: 15,))
+              //     ),
+              //   ),
+              // ),
+              Expanded(child: Center(
+                child: Text("${months[sunday.month-1]} ${sunday.day} - ${sunday.add(Duration(days: 6)).day}",
+                style: TextStyle(fontFamily: "Lexend", fontSize: 16),),
+              )),
+              // Padding(
+              //   padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              //   child: SizedBox(
+              //     width: 50,
+              //     child: ElevatedButton(onPressed: (){
+              //       dateForward();
+              //     }, child: Center(child: Icon(Icons.arrow_forward_ios, size: 15 ,)),
+              //     ),
+              //   ),
+              // ),
             ],
           )
-          ,Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: AspectRatio(
-              aspectRatio: 1.7,
-              child: Card(elevation: 0,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(4)),
-                child: _BarChart(numWeeklyProgress: numProgressPastWeek,),),
+          ,Row(
+            children: [
+              Padding(
+                padding: EdgeInsets.fromLTRB(8,0,0,0),
+                child:
+                SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: IconButton(
+                    padding: EdgeInsets.all(0),
+                    icon: const Icon(Icons.arrow_back_ios),
+                    onPressed: (){
+                      dateBack();
+                    },
+                  ),
+                ),
+              ),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  child: GestureDetector(
+                    onHorizontalDragEnd: (details){
+                      int sensitivity = 3;
+                      if (details.primaryVelocity! > sensitivity) {
+                        // Right Swipe
+                        dateBack();
+                      } else if(details.primaryVelocity! < -sensitivity){
+                        //Left Swipe
+                        dateForward();
+                      }
+                    },
+                    child:
+                        AspectRatio(
+                          aspectRatio: 1.6,
+                          child: Card(elevation: 0,
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(4)),
+                            child: _BarChart(numWeeklyProgress: numProgressPastWeek, sunday: sunday,),),
 
-            ),
+                        ),
+                  ),
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.fromLTRB(0,0,8,0),
+                child:
+                  SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: IconButton(
+                    padding: EdgeInsets.all(0),
+                    icon: Icon(Icons.arrow_forward_ios, color: (daysBetween(DateTime.now(), sunday)<0)? Colors.black:Colors.grey[300],),
+                    onPressed: (){
+                      dateForward();
+                    },
+                  ),
+                ),
+              ),
+            ],
           ),
           Expanded(
             child: Material(
@@ -181,8 +283,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   Widget deckListBuilder() {
     return RefreshIndicator(
       onRefresh: ()=>refresh(),
-      child: ListView.builder(
-          shrinkWrap: true,
+      child:
+      ListView.builder(
+        padding: EdgeInsets.fromLTRB(0,0,0,75),
+        shrinkWrap: true,
           itemCount: decks.length,
           itemBuilder: (context, index) {
             return ListTile(
@@ -226,7 +330,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
 class _BarChart extends StatelessWidget {
   List<int> numWeeklyProgress;
-  _BarChart({Key? key, required this.numWeeklyProgress}) : super(key: key);
+  DateTime sunday;
+  _BarChart({Key? key, required this.numWeeklyProgress, required this.sunday}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -234,8 +339,8 @@ class _BarChart extends StatelessWidget {
         BarChartData(
             titlesData: titlesData,
             barGroups: barGroups,
-            gridData: FlGridData(show: false),
-            maxY: 15
+            gridData: FlGridData(show: true, horizontalInterval: 1, verticalInterval: 10),
+            maxY: numWeeklyProgress.reduce(max).toDouble()+5-(numWeeklyProgress.reduce(max).toDouble()%5),
         )
     );
 
@@ -246,14 +351,20 @@ class _BarChart extends StatelessWidget {
   }
 
   Widget getTitles(double value, TitleMeta meta){
-    const textStyle = TextStyle(
+    const textStyleBold = TextStyle(
         color: Colors.black,
         fontFamily: "Lexend",
         fontWeight: FontWeight.bold,
-        fontSize: 16
+        fontSize: 16,
+    );
+    const textStyle = TextStyle(
+      color: Colors.black,
+      fontFamily: "Lexend",
+      fontSize: 16,
     );
 
     String text;
+    String date = "\n${sunday.day +value.toInt()}";
 
     switch(value.toInt()){
       case 0:
@@ -282,7 +393,19 @@ class _BarChart extends StatelessWidget {
         break;
     }
 
-    return SideTitleWidget(axisSide: meta.axisSide, child: Text(text, style: textStyle,));
+
+    return SideTitleWidget(axisSide: meta.axisSide, child:
+    RichText(
+      textAlign: TextAlign.center,
+      text: TextSpan(
+        children: <TextSpan>[
+          TextSpan(text: text, style: textStyleBold),
+          TextSpan(text: date,style: textStyle)
+        ]
+      ),
+
+    )
+    );
   }
 
   FlTitlesData get titlesData=>FlTitlesData(
@@ -290,11 +413,11 @@ class _BarChart extends StatelessWidget {
       bottomTitles: AxisTitles(
           sideTitles: SideTitles(
               showTitles: true,
-              reservedSize: 30,
+              reservedSize: 60,
               getTitlesWidget: getTitles
           )
       ),
-      leftTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+      leftTitles: AxisTitles(sideTitles: SideTitles(showTitles: true, reservedSize: 30)),
       rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
       topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false))
   );

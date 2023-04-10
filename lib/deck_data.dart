@@ -63,6 +63,7 @@ class Flashcard{
   int? deckID;
   bool isImage = false;
 
+
   double eFactor;
   int repetitions;
   DateTime nextReview;

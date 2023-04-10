@@ -7,6 +7,7 @@ import 'package:card_flow/deck_data.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:zefyrka/zefyrka.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class DeckDrop{
   int? id;
@@ -18,7 +19,9 @@ class DeckDrop{
 
 class CardEditScreenArguments{
   Flashcard? card;
-  final int selectedDeckID;
+  int selectedDeckID;
+
+
 
   CardEditScreenArguments({this.card, required this.selectedDeckID});
 }
@@ -151,7 +154,7 @@ class _CardEditState extends State<CardEdit> {
         appBar: AppBar(
           title: Text(
             (isExistingCard)? _decodeCardTitle(args.card) : args.card!.front,
-            style: const TextStyle(fontFamily: 'Lexend'),
+            style: GoogleFonts.getFont('Open Sans'),
           ),
         ),
         backgroundColor: Colors.white,
@@ -189,11 +192,14 @@ class _CardEditState extends State<CardEdit> {
                     ],
                   ),
                 )
-                , const Text("Front", style: TextStyle(
-                    fontSize: 26.0, color: Colors.black, fontFamily: "Lexend")),
+                , const Padding(
+                  padding: EdgeInsets.fromLTRB(0,8,0,0),
+                  child: Text("Front", style: TextStyle(
+                      fontSize: 18.0, color: Colors.black, fontFamily: "Lexend")),
+                ),
                 Padding(
                   padding: const EdgeInsets.all(8.0),
-                  child: ZefyrToolbar.basic(controller: _controller!),
+                  child: ZefyrToolbar.basic(controller: _controller!, hideHeadingStyle: true,),
                 ),
                 Padding(
                   padding: const EdgeInsets.all(8.0),
@@ -201,16 +207,16 @@ class _CardEditState extends State<CardEdit> {
                       border: Border.all(width: 1.0, color: Colors.black)), child:
                   Padding(
                     padding: const EdgeInsets.only(left: 8),
-                    child: ZefyrEditor(controller: _controller!
-                      ,),
+                    child: ZefyrEditor(controller: _controller!,
+                      ),
                   ))),
                 ),
                 SizedBox(height: 50,),
                 const Text("Back", style: TextStyle(
-                    fontSize: 26.0, color: Colors.black, fontFamily: "Lexend")),
+                    fontSize: 18.0, color: Colors.black, fontFamily: "Open Sans")),
                 Padding(
                   padding: const EdgeInsets.all(8.0),
-                  child: ZefyrToolbar.basic(controller: _controller2!),
+                  child: ZefyrToolbar.basic(controller: _controller2!, hideHeadingStyle: true),
                 ),
                 Padding(
                   padding: const EdgeInsets.all(8.0),
@@ -236,7 +242,7 @@ class _CardEditState extends State<CardEdit> {
                         children: const [
                           Icon(Icons.save),
                           SizedBox(width: 8,),
-                          Text("Save"),
+                          Text("Save", style: TextStyle(fontFamily: "Lexend"),),
                         ],
                       ),
                     ),
@@ -282,6 +288,7 @@ class _CardEditState extends State<CardEdit> {
     }else{
       args.card.front = contents;
       args.card.back = contents2;
+      args.card.deckID = args.selectedDeckID;
       await Data.instance.updateFlashcard(args.card);
     }
 
