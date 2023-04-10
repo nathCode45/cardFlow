@@ -168,10 +168,9 @@ class _CardEditState extends State<CardEdit> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Text("Deck: ", style: TextStyle(
+                      Text("Deck: ", style: GoogleFonts.openSans(
                           fontSize: 16.0,
                           color: Colors.black,
-                          fontFamily: "Lexend",
                           fontWeight: FontWeight.bold)),
                       isLoading? const Center(child: CircularProgressIndicator()) : DropdownButton<int>(
                           value: args.selectedDeckID,
@@ -192,10 +191,11 @@ class _CardEditState extends State<CardEdit> {
                     ],
                   ),
                 )
-                , const Padding(
-                  padding: EdgeInsets.fromLTRB(0,8,0,0),
-                  child: Text("Front", style: TextStyle(
-                      fontSize: 18.0, color: Colors.black, fontFamily: "Lexend")),
+                , Padding(
+                  padding: const EdgeInsets.fromLTRB(0,8,0,0),
+                  child: Text("Front", style: GoogleFonts.openSans(
+                      fontSize: 16.0,
+                      color: Colors.black,fontWeight: FontWeight.bold)),
                 ),
                 Padding(
                   padding: const EdgeInsets.all(8.0),

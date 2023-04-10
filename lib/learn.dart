@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/cupertino.dart';
@@ -23,6 +24,8 @@ class _LearnState extends State<Learn> {
   bool isLoading = false;
   bool isCardsDue = false;
   bool isImage = false;
+  Duration skipBuffer = Duration.zero;
+  Timer? _timer;
 
   late ZefyrController? _controllerFront = ZefyrController();
   late ZefyrController? _controllerBack = ZefyrController();
@@ -41,7 +44,6 @@ class _LearnState extends State<Learn> {
 
 
   Future<Flashcard?> getLearnCard() async {
-    print("getLearnCard() called");
     int nearest = 0;
 
     //List<int> dueListIDs = []; //list of ids instead of entire cards, in order to save space
@@ -53,7 +55,8 @@ class _LearnState extends State<Learn> {
     //   }
     // }
 
-    List<int> dueListIDs = await widget.deck.getCardsDueIDs();
+    List<int> dueListIDs = await widget.deck.getCardsDueIDs(skipBuffer: skipBuffer);
+    skipBuffer = Duration.zero;
 
     if(dueListIDs.isNotEmpty) {
       for (int i = 0; i < dueListIDs.length; i++) {
@@ -133,6 +136,22 @@ class _LearnState extends State<Learn> {
 
   }
 
+  void startTimer(){
+    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
+      if(_getWhenNext().difference(DateTime.now()).inSeconds<=0){
+        timer.cancel();
+        Timer(const Duration(milliseconds: 100), (){});//wait a small amount of time so that transition is smoother
+        setState(() {
+          refreshCards();
+        });
+      }else if(isCardsDue) {
+        timer.cancel();
+      }else {
+          setState(() {});
+      }
+    });
+  }
+
   Widget cardSide(String? side){
     return Padding(
       padding: const EdgeInsets.all(16.0),
@@ -170,7 +189,9 @@ class _LearnState extends State<Learn> {
   Widget build(BuildContext context) {
     _diffFactor = 0; //reset diff factor to zero because thats how the slider widget intiitalizes
 
-
+    if(!isCardsDue && _getWhenNext().difference(DateTime.now()).inSeconds<60){
+      startTimer();
+    }
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -181,156 +202,159 @@ class _LearnState extends State<Learn> {
         ),
       ),
       body: (isCardsDue) ?
-      Center(child:
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          mainAxisAlignment: MainAxisAlignment.start,
-          mainAxisSize: MainAxisSize.max,
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Center(
-                child: (isImage)?
-                    cardSide((reveal)?currentCard?.back:currentCard?.front)
-                  :
-
-                  Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(15),
-                      color: Colors.white,
-                      border: Border.all(color: Colors.black26, width: 2),
-                    ),
-                    child: (_controllerFront == null) ?
-                    const Center(child: CircularProgressIndicator(),)
-                        : ZefyrEditor(controller: _controllerFront!, readOnly: true, padding: const EdgeInsets.all(16), showCursor: false,),
-                  ),
-              ),
-            ),
-            (reveal && !isImage) ? Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-              child: Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(15),
-                  color: Colors.white,
-                  border: Border.all(color: Colors.black26, width: 2),
-                ),
+      SingleChildScrollView(
+        child: Center(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            mainAxisAlignment: MainAxisAlignment.start,
+            mainAxisSize: MainAxisSize.max,
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(16.0),
                 child: Center(
-                  child: (_controllerBack == null) ?
-                  const Center(child: CircularProgressIndicator(),)
-                      : ZefyrEditor(controller: _controllerBack!, readOnly: true, padding: const EdgeInsets.all(16), showCursor: false,),
+                  child: (isImage)?
+                      cardSide((reveal)?currentCard?.back:currentCard?.front)
+                    :
+
+                    Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(15),
+                        color: Colors.white,
+                        border: Border.all(color: Colors.black26, width: 2),
+                      ),
+                      child: (_controllerFront == null) ?
+                      const Center(child: CircularProgressIndicator(),)
+                          : ZefyrEditor(controller: _controllerFront!, readOnly: true, padding: const EdgeInsets.all(16), showCursor: false,),
+                    ),
                 ),
               ),
-            ): const SizedBox(height: 5,),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: TextButton(
-                  onPressed: (){
-                    setState((){
-                      reveal = !reveal;
-                    });
-                    if(reveal) {
-                      setState(() {
-                        isLoading = true;
+              (reveal && !isImage) ? Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(15),
+                    color: Colors.white,
+                    border: Border.all(color: Colors.black26, width: 2),
+                  ),
+                  child: Center(
+                    child: (_controllerBack == null) ?
+                    const Center(child: CircularProgressIndicator(),)
+                        : ZefyrEditor(controller: _controllerBack!, readOnly: true, padding: const EdgeInsets.all(16), showCursor: false,),
+                  ),
+                ),
+              ): const SizedBox(height: 5,),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: TextButton(
+                    onPressed: (){
+                      setState((){
+                        reveal = !reveal;
                       });
-                      _loadDocument(currentCard!.back).then((document) {
+                      if(reveal) {
                         setState(() {
-                          _controllerBack = ZefyrController(document);
+                          isLoading = true;
                         });
-                      });
-                      setState(() => isLoading = false);
-                    }
-                  },
-                  style: ButtonStyle(
-                    shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                      RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        side: BorderSide(color: Colors.black12, width: 2.0)
+                        _loadDocument(currentCard!.back).then((document) {
+                          setState(() {
+                            _controllerBack = ZefyrController(document);
+                          });
+                        });
+                        setState(() => isLoading = false);
+                      }
+                    },
+                    style: ButtonStyle(
+                      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                        RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          side: BorderSide(color: Colors.black12, width: 2.0)
+                        )
                       )
-                    )
-                  ),
-                  child: const Padding(
-                    padding: EdgeInsets.all(16.0),
-                    child: Text("Flip"),
-                  ),
-              ),
-            ),
-            (reveal)? Column(
-              children: [
-                // const Padding(
-                //   padding: EdgeInsets.fromLTRB(8, 16, 8, 8),
-                //   child: Text("Difficulty", style: TextStyle(
-                //     fontSize: 24
-                //   ),),
-                // ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16,8,16,8),
-                  child: SliderWidget(card: currentCard!, onSliderChanged: (double value){_diffFactor = value;}),
+                    ),
+                    child: const Padding(
+                      padding: EdgeInsets.all(16.0),
+                      child: Text("Flip"),
+                    ),
                 ),
-                // Container(
-                //   decoration: const BoxDecoration(
-                //     gradient: LinearGradient(colors: [Color.fromARGB(255, 29, 221, 163), Colors.green])
-                //   ),
-                //   child: Slider(
-                //     value: _slideFactor,
-                //     min: 0,
-                //     max: 2,
-                //     onChanged: (double value) {
-                //       setState(() {
-                //         _slideFactor = value;
-                //         _diffFactor = _correctIndex*3+_slideFactor;
-                //       });
-                //       },
-                //     divisions: 6,
-                //     label: "Next repetition: ${cards[0].reviewInterval(_diffFactor, cards[0].repetitions).inMinutes} minutes",
-                //   ),
-                // ),
-                /*TODO left off with this idea: make grading scale not non-discrete (doubles not just 0-5)
-                   there will be two factors influencing the grading: time to answer and difficulty rating
-                   time to answer will have the greatest impact on grading but difficulty rating will also have a 35% effect or sum like that
-                   This approach makes sense because some cards may have a long prompt at the front but they are still easy for the user to
-                   guess, so looking at the time to guess alone would be misleading, therefore it will take both time and diff rating into account
-                */
-                /*
-                  updated TODO i think we should actually go for the one slider approach instead with a red wrong section and a green right section
-                  use this: https://medium.com/flutter-community/flutter-sliders-demystified-4b3ea65879c to help make it
-                 */
-              ],
+              ),
+              (reveal)? Column(
+                children: [
+                  // const Padding(
+                  //   padding: EdgeInsets.fromLTRB(8, 16, 8, 8),
+                  //   child: Text("Difficulty", style: TextStyle(
+                  //     fontSize: 24
+                  //   ),),
+                  // ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16,8,16,8),
+                    child: SliderWidget(card: currentCard!, onSliderChanged: (double value){_diffFactor = value;}),
+                  ),
+                  // Container(
+                  //   decoration: const BoxDecoration(
+                  //     gradient: LinearGradient(colors: [Color.fromARGB(255, 29, 221, 163), Colors.green])
+                  //   ),
+                  //   child: Slider(
+                  //     value: _slideFactor,
+                  //     min: 0,
+                  //     max: 2,
+                  //     onChanged: (double value) {
+                  //       setState(() {
+                  //         _slideFactor = value;
+                  //         _diffFactor = _correctIndex*3+_slideFactor;
+                  //       });
+                  //       },
+                  //     divisions: 6,
+                  //     label: "Next repetition: ${cards[0].reviewInterval(_diffFactor, cards[0].repetitions).inMinutes} minutes",
+                  //   ),
+                  // ),
+                  /*TODO left off with this idea: make grading scale not non-discrete (doubles not just 0-5)
+                     there will be two factors influencing the grading: time to answer and difficulty rating
+                     time to answer will have the greatest impact on grading but difficulty rating will also have a 35% effect or sum like that
+                     This approach makes sense because some cards may have a long prompt at the front but they are still easy for the user to
+                     guess, so looking at the time to guess alone would be misleading, therefore it will take both time and diff rating into account
+                  */
+                  /*
+                    updated TODO i think we should actually go for the one slider approach instead with a red wrong section and a green right section
+                    use this: https://medium.com/flutter-community/flutter-sliders-demystified-4b3ea65879c to help make it
+                   */
+                ],
 
-            ): Container(),
+              ): Container(),
 
-            (reveal)?Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: ElevatedButton(onPressed: ((){
-                setState(() {
-                  print("\n ${currentCard!.front.toString()} diffFactor:${_diffFactor} repetitions: ${currentCard!.repetitions}");
-                  currentCard!.nextReview = DateTime.now().add(currentCard!.reviewInterval(_diffFactor, currentCard!.repetitions)); //schedule next review
-                  print("\n\n ${currentCard!.front.toString()} next review interval:${currentCard!.reviewInterval(_diffFactor, currentCard!.repetitions)} nextReview: ${currentCard!.nextReview}");
+              (reveal)?Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: ElevatedButton(onPressed: ((){
+                  setState(() {
 
-                  currentCard!.updateRepetitions(_diffFactor);
+                    currentCard!.nextReview = DateTime.now().add(currentCard!.reviewInterval(_diffFactor, currentCard!.repetitions)); //schedule next review
+                    //print("\n\n ${currentCard!.front.toString()} next review interval:${currentCard!.reviewInterval(_diffFactor, currentCard!.repetitions)} nextReview: ${currentCard!.nextReview}");
 
-
-                  // if(_diffFactor>=3) {
-                  //   currentCard!.eFactor = currentCard!.getUpdatedEFactor(_diffFactor);
-                  //   //print("Updated eFactor: ${currentCard.getUpdatedEFactor(_diffFactor)}");
-                  // }
-                  currentCard!.eFactor = currentCard!.getUpdatedEFactor(_diffFactor);
+                    currentCard!.updateRepetitions(_diffFactor);
 
 
-                  Data.instance.updateFlashcard(currentCard!);
-                  Data.instance.createProgressRep(ProgressRep(dateTime: DateTime.now(), deckID: widget.deck.id!)); //record the progress
+                    // if(_diffFactor>=3) {
+                    //   currentCard!.eFactor = currentCard!.getUpdatedEFactor(_diffFactor);
+                    //   //print("Updated eFactor: ${currentCard.getUpdatedEFactor(_diffFactor)}");
+                    // }
+                    currentCard!.eFactor = currentCard!.getUpdatedEFactor(_diffFactor);
+                    print("\neFactor:${currentCard!.eFactor} repetitions: ${currentCard!.repetitions}");
 
-                  reveal = false;
+
+                    Data.instance.updateFlashcard(currentCard!);
+                    Data.instance.createProgressRep(ProgressRep(dateTime: DateTime.now(), deckID: widget.deck.id!)); //record the progress
+
+                    reveal = false;
 
 
 
-                  refreshCards();
-                });
+                    refreshCards();
+                  });
 
-              }), child: Icon(Icons.arrow_forward_ios_sharp)),
-            ):Container()
-          ],
-        )
-
+                }), child: Icon(Icons.arrow_forward_ios_sharp)),
+              ):Container(),
+              SizedBox(height: 100,)
+            ],
+          ),
+        ),
       ):
       Center(
           child: Column(
@@ -347,7 +371,12 @@ class _LearnState extends State<Learn> {
                     child: Text("Waiting betweeen repetitions enhances memory, but if you're in a rush you can skip to the next review"),
                   ),
                 ),
-                TextButton.icon(onPressed: (){}, icon: Icon(Icons.skip_next), label: Text("Skip"),)
+                TextButton.icon(onPressed: (){
+                  skipBuffer = _getWhenNext().difference(DateTime.now());
+                  setState(() {
+                    refreshCards();
+                  });
+                }, icon: Icon(Icons.skip_next), label: Text("Skip"),),
 
               ]
           )

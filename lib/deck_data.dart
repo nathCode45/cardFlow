@@ -41,13 +41,15 @@ class Deck{
     return await Data.instance.readFlashcards(deckID: id);
   }
 
-  Future<List<int>> getCardsDueIDs() async{
+  Future<List<int>> getCardsDueIDs({Duration? skipBuffer}) async{
 
     List<Flashcard> cards = await getCards();
     List<int> dueListIDs = []; //list of ids instead of entire cards, in order to save space
 
+    DateTime compareToTime = (skipBuffer!=null)? DateTime.now().add(skipBuffer): DateTime.now();
+
     for(int i = 0; i<cards.length; i++){
-      if(cards[i].nextReview.compareTo(DateTime.now()) < 0){
+      if(cards[i].nextReview.compareTo(compareToTime) < 0){
         dueListIDs.add(cards[i].id!);
       }
     }
@@ -68,7 +70,7 @@ class Flashcard{
   int repetitions;
   DateTime nextReview;
 
-  static const double INITIAL_EFACTOR = 1.5;//2.5;
+  static const double INITIAL_EFACTOR = 4.2;//2.5;
 
   Flashcard(this.front, this.back, {this.id, this.deckID, this.isImage=false}):
     nextReview = DateTime.now(),
@@ -108,7 +110,7 @@ class Flashcard{
     //print("eFactor: ${getUpdatedEFactor(grade)}, repetitions: $repetitions ");
 
     int roundedGrade = grade.round();
-    if(gRepetitions<=2) {
+    if(gRepetitions<=1) {
       switch (roundedGrade) {
         case 0:
           return const Duration(seconds: 5);
