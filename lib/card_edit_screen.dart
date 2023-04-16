@@ -1,7 +1,5 @@
 import 'dart:convert';
-import 'dart:io';
 import 'package:card_flow/launch_deck.dart';
-import 'package:sqflite/sqflite.dart';
 
 import 'package:card_flow/deck_data.dart';
 import 'package:flutter/cupertino.dart';
@@ -62,13 +60,11 @@ class _CardEditState extends State<CardEdit> {
       isLoading = true;
     });
 
-    this.decks = await Data.instance.readDecks();
+    decks = await Data.instance.readDecks();
 
-    decks.forEach(
-        (Deck d){
+    for (var d in decks) {
           deckDropMap[d.id!] = d.name;
         }
-    );
 
     //widget.selectedDeckID = deckDropMap.keys.toList().first;
 
@@ -125,7 +121,7 @@ class _CardEditState extends State<CardEdit> {
               ScaffoldMessenger.of(context)
                   .showSnackBar(SnackBar(content: Text('Deleted $name')));
               Navigator.popUntil(context, ModalRoute.withName(LaunchDeck.routeName));
-            }, child: Text("YES")),
+            }, child: const Text("YES")),
 
 
           ],
@@ -138,13 +134,13 @@ class _CardEditState extends State<CardEdit> {
   @override
   Widget build(BuildContext context) {
     args = ModalRoute.of(context)!.settings.arguments as CardEditScreenArguments;
-    print(args.card?.front);
+    //print(args.card?.front);
     isExistingCard = (args.card?.front != null && args.card?.front!="");
 
     args.card ??= Flashcard("", "", id: 1);
 
     if(isExistingCard){
-      print("It is an existing card!");
+      //print("It is an existing card!");
       setState(() {
         _controller = ZefyrController(NotusDocument.fromJson(jsonDecode(args.card.front)));
         _controller2 = ZefyrController(NotusDocument.fromJson(jsonDecode(args.card.back)));
@@ -176,8 +172,8 @@ class _CardEditState extends State<CardEdit> {
                           value: args.selectedDeckID,
                           items:
                           deckDropMap.keys.toList().map<DropdownMenuItem<int>>((int idv){
-                            return DropdownMenuItem<int>(value: idv, child: Text(deckDropMap[idv]!, style: const TextStyle(
-                                fontSize: 16.0, color: Colors.black, fontFamily: "Lexend")));
+                            return DropdownMenuItem<int>(value: idv, child: Text(deckDropMap[idv]!, style: GoogleFonts.openSans(
+                                fontSize: 16.0, color: Colors.black)));
                           }
                           ).toList(),
                           onChanged: (int? idv) {
@@ -194,8 +190,7 @@ class _CardEditState extends State<CardEdit> {
                 , Padding(
                   padding: const EdgeInsets.fromLTRB(0,8,0,0),
                   child: Text("Front", style: GoogleFonts.openSans(
-                      fontSize: 16.0,
-                      color: Colors.black,fontWeight: FontWeight.bold)),
+                      fontSize: 20.0,)),
                 ),
                 Padding(
                   padding: const EdgeInsets.all(8.0),
@@ -206,14 +201,14 @@ class _CardEditState extends State<CardEdit> {
                   child: Center(child: Container(decoration: BoxDecoration(
                       border: Border.all(width: 1.0, color: Colors.black)), child:
                   Padding(
-                    padding: const EdgeInsets.only(left: 8),
+                    padding: const EdgeInsets.fromLTRB(8,2,8,2),
                     child: ZefyrEditor(controller: _controller!,
                       ),
                   ))),
                 ),
                 SizedBox(height: 50,),
-                const Text("Back", style: TextStyle(
-                    fontSize: 18.0, color: Colors.black, fontFamily: "Open Sans")),
+                Text("Back", style: GoogleFonts.openSans(
+                    fontSize: 20.0,)),
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: ZefyrToolbar.basic(controller: _controller2!, hideHeadingStyle: true),
@@ -233,16 +228,16 @@ class _CardEditState extends State<CardEdit> {
                     width: 125,
                     child: ElevatedButton(
                       onPressed: () {
-                        print("Is it an existing card? $isExistingCard");
+                        //print("Is it an existing card? $isExistingCard");
                         _saveDocument(context, isExistingCard);
                       },
                       child: Row(
                         mainAxisSize: MainAxisSize.max,
                         mainAxisAlignment: MainAxisAlignment.center,
-                        children: const [
-                          Icon(Icons.save),
-                          SizedBox(width: 8,),
-                          Text("Save", style: TextStyle(fontFamily: "Lexend"),),
+                        children: [
+                          const Icon(Icons.save),
+                          const SizedBox(width: 8,),
+                          Text("Save", style: GoogleFonts.openSans(),),
                         ],
                       ),
                     ),
@@ -254,7 +249,7 @@ class _CardEditState extends State<CardEdit> {
                       child: ElevatedButton(
                         style: ButtonStyle(
                             backgroundColor: MaterialStateProperty.all<Color>(
-                                Colors.grey[400]!),
+                                Colors.grey[700]!),
                             foregroundColor: MaterialStateProperty.all<Color>(
                                 Colors.white)
                         ),
@@ -262,10 +257,10 @@ class _CardEditState extends State<CardEdit> {
                         child: Row(
                           mainAxisSize: MainAxisSize.max,
                           mainAxisAlignment: MainAxisAlignment.center,
-                          children: const [
-                            Icon(Icons.delete),
-                            SizedBox(width: 8,),
-                            Text("Delete"),
+                          children: [
+                            const Icon(Icons.delete),
+                            const SizedBox(width: 8,),
+                            Text("Delete", style: GoogleFonts.openSans(),),
                           ],
                         ),
                       ),
@@ -279,6 +274,8 @@ class _CardEditState extends State<CardEdit> {
   }
 
   void _saveDocument(BuildContext context, bool isExistingCard) async {
+    print(_controller!.document);
+    print(_controller2!.document);
     final contents = jsonEncode(_controller!.document);
     final contents2 = jsonEncode(_controller2!.document);
 
@@ -288,12 +285,14 @@ class _CardEditState extends State<CardEdit> {
     }else{
       args.card.front = contents;
       args.card.back = contents2;
+      //print("$contents/n$contents2");
       args.card.deckID = args.selectedDeckID;
       await Data.instance.updateFlashcard(args.card);
+      //print(args.card);
     }
 
     ScaffoldMessenger.of(context)
-        .showSnackBar(SnackBar(content: Text('Saved.')));
+        .showSnackBar(SnackBar(content: Text('Saved.', style: GoogleFonts.openSans(),)));
 
     ///reset controllers to be empty
     setState(() {
@@ -314,63 +313,3 @@ class _CardEditState extends State<CardEdit> {
   }
 }
 
-// class DeckListDropdown extends StatefulWidget {
-//   DeckListDropdown({Key? key, required this.initialSelectedDeck}) : super(key: key);
-//   final Deck initialSelectedDeck;
-//
-//
-//   @override
-//   State<DeckListDropdown> createState() => DeckListDropdownState();
-// }
-//
-// class DeckListDropdownState extends State<DeckListDropdown> {
-//   Deck? selectedDeck;
-//   bool isLoading = false;
-//   late List<Deck> decks;
-//
-//   @override
-//   void initState() {
-//     refreshDecks();
-//     selectedDeck = widget.initialSelectedDeck;
-//     super.initState();
-//   }
-//
-//   Future refreshDecks() async {
-//     setState(() {
-//       isLoading = true;
-//     });
-//
-//     this.decks = await Data.instance.readDecks();
-//
-//     setState(() => isLoading = false);
-//   }
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return isLoading ? const Center(child: CircularProgressIndicator()) : ListView.builder(
-//       shrinkWrap: true,
-//         itemCount: decks.length,
-//         itemBuilder: (context, index) {
-//           return DropdownButton<Deck>(
-//               value: selectedDeck,
-//               items:
-//                   List.generate(decks.length, (index) {
-//                     return DropdownMenuItem<Deck>(value: decks[index],
-//                                   child: Text(decks[index].name, style: const TextStyle(
-//                                       fontSize: 16.0,
-//                                       color: Colors.black,
-//                                       fontFamily: "Lexend")));
-//                   }),
-//               onChanged: (Deck? value) {
-//                 setState(() {
-//                   selectedDeck = value!;
-//                 });
-//               }
-//           );
-//
-//         }
-//     );
-//   }
-// }
-//
-//

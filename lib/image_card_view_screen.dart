@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:card_flow/deck_data.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:zefyrka/zefyrka.dart';
 
 import 'launch_deck.dart';
@@ -63,16 +64,16 @@ class _ImageCardViewScreenState extends State<ImageCardViewScreen> {
               String name = "Image";
               Data.instance.deleteFlashcard(flashcard.id!);
               ScaffoldMessenger.of(context)
-                  .showSnackBar(SnackBar(content: Text('Deleted $name')));
+                  .showSnackBar(SnackBar(content: Text('Deleted $name', style: GoogleFonts.openSans(),)));
               Navigator.popUntil(context, ModalRoute.withName(LaunchDeck.routeName));
             },
             child: Row(
               mainAxisSize: MainAxisSize.max,
               mainAxisAlignment: MainAxisAlignment.center,
-              children: const [
-                Icon(Icons.delete),
-                SizedBox(width: 8,),
-                Text("Delete"),
+              children: [
+                const Icon(Icons.delete),
+                const SizedBox(width: 8,),
+                Text("Delete", style: GoogleFonts.openSans(),),
               ],
             ),
           ),
@@ -84,8 +85,20 @@ class _ImageCardViewScreenState extends State<ImageCardViewScreen> {
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text("Front", style: GoogleFonts.openSans(
+                  fontSize: 24.0,
+                  color: Colors.black)),
+            ),
             Expanded(
               child: cardSide(flashcard.front)
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text("Back", style: GoogleFonts.openSans(
+                  fontSize: 24.0,
+                  color: Colors.black)),
             ),
             Expanded(
                 child: cardSide(flashcard.back)

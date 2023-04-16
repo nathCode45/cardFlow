@@ -6,6 +6,7 @@ import 'package:card_flow/image_card_view_screen.dart';
 import 'package:card_flow/image_to_fcard.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:zefyrka/zefyrka.dart';
 import 'deck_data.dart';
@@ -70,7 +71,7 @@ class _LaunchDeckState extends State<LaunchDeck> {
       appBar: AppBar(
         title: Text(
           args.name,
-          style: const TextStyle(fontFamily: 'Lexend'),
+          style: GoogleFonts.openSans(),
         ),
       ),
       floatingActionButton: Column(
@@ -97,7 +98,7 @@ class _LaunchDeckState extends State<LaunchDeck> {
               final value = await Navigator.push(context, MaterialPageRoute(builder: (context)=>ImageCardScreen(camera: firstCamera, deck: args)));
               setState(() {refreshCards(); print("called btn2");});
             },
-            child: Icon(Icons.camera),
+            child: Icon(Icons.camera_alt),
           )
         ]
       ),
@@ -108,22 +109,30 @@ class _LaunchDeckState extends State<LaunchDeck> {
                 padding: const EdgeInsets.fromLTRB(0,24.0,0,0),
                 child: RichText(
                     text: TextSpan(
-                        style: const TextStyle(
-                            fontSize: 26.0, color: Colors.black, fontFamily: "Lexend"),
+                        style: GoogleFonts.openSans(
+                            fontSize: 26.0, color: Colors.black),
                         children: [
                       TextSpan(
                           text: (isLoading)?"":'$cardsDue ',
-                          style: TextStyle(fontWeight: FontWeight.bold)),
-                      const TextSpan(text: 'Cards Due')
+                          style: GoogleFonts.openSans(fontWeight: FontWeight.bold)),
+                      TextSpan(text: 'Cards Due', style: GoogleFonts.openSans())
                     ]))),
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 32.0),
               child: OutlinedButton(onPressed: () async {
-                final value = await Navigator.push(context, MaterialPageRoute(builder: (context) => Learn(deck: args)));
-                setState(() {
-                  refreshCards();
-                });
-              }, child: Text("Start Studying", style: TextStyle(fontFamily: "Lexend"),)),
+
+                if(cards.isNotEmpty){
+                  final value = await Navigator.push(context, MaterialPageRoute(builder: (context) => Learn(deck: args)));
+                  setState(() {
+                    refreshCards();
+                  });
+                }else{
+                  //TODO actually wait nvm it should open and then give them the option to skip to the next review
+                  ScaffoldMessenger.of(context)
+                      .showSnackBar(SnackBar(content: Text('No cards have been created in this deck yet. ', style: GoogleFonts.openSans(),)));
+                }
+
+              }, child: Text("Start Studying", style: GoogleFonts.openSans(),)),
             ),
             Expanded(
               child: Material(
@@ -153,13 +162,15 @@ class _LaunchDeckState extends State<LaunchDeck> {
               leading: const Image(image: AssetImage(
                   'assets/card_icon.png')),
               title: (cards[index].isImage==null ||(cards[index].isImage!=null && cards[index].isImage==false))?
-              Text(front):
+              Text(front, style: GoogleFonts.openSans(),):
               Align(
                 alignment: Alignment.topLeft,
                 child: SizedBox(
-                  width: 50,
-                    height: 50,
-                    child: Image.memory(base64Decode(cards[index].front)) //TODO load the image in a lower resolution
+                  width: 45,
+                    height: 45,
+                    child: ClipRRect(
+                        borderRadius: BorderRadius.circular(4),
+                        child: Image.memory(base64Decode(cards[index].front), fit: BoxFit.cover,)) //TODO load the image in a lower resolution
                 ),
               ),
               onTap: (cards[index].isImage==null ||(cards[index].isImage!=null && cards[index].isImage==false))?
@@ -182,7 +193,7 @@ class _LaunchDeckState extends State<LaunchDeck> {
         }),
       );
     }else{
-      return Text("No cards yet");
+      return Text("No cards yet", style: GoogleFonts.openSans(),);
     }
   }
 

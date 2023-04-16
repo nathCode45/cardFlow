@@ -190,6 +190,12 @@ class ProgressRep{
       'formattedDateTime': formatter.format(dateTime),
     };
 
+
+  }
+
+  @override
+  String toString(){
+    return "$id, $deckID, $dateTime";
   }
 
   ProgressRep copy({int? id, int? deckID, DateTime? dateTime}) {

@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:zefyrka/zefyrka.dart';
 import 'custom_widgets/slider_widget.dart';
 
@@ -189,7 +190,7 @@ class _LearnState extends State<Learn> {
   Widget build(BuildContext context) {
     _diffFactor = 0; //reset diff factor to zero because thats how the slider widget intiitalizes
 
-    if(!isCardsDue && _getWhenNext().difference(DateTime.now()).inSeconds<60){
+    if(!isCardsDue && !isLoading && _getWhenNext().difference(DateTime.now()).inSeconds<120){
       startTimer();
     }
 
@@ -198,7 +199,7 @@ class _LearnState extends State<Learn> {
       appBar: AppBar(
         title: Text(
           "${widget.deck.name} | Learn",
-          style: const TextStyle(fontFamily: 'Lexend'),
+          style: GoogleFonts.openSans(),
         ),
       ),
       body: (isCardsDue) ?
@@ -270,9 +271,9 @@ class _LearnState extends State<Learn> {
                         )
                       )
                     ),
-                    child: const Padding(
-                      padding: EdgeInsets.all(16.0),
-                      child: Text("Flip"),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Text("Flip", style: GoogleFonts.openSans(),),
                     ),
                 ),
               ),
@@ -364,11 +365,11 @@ class _LearnState extends State<Learn> {
                 (isLoading)? CircularProgressIndicator():Text("Next card due in: ${
                     SliderWidget.formattedTime(_getWhenNext().difference(DateTime.now()), seconds: true) //uses formatted time from slider widget
                 }"),
-                TextButton(onPressed: refreshCards, child: Text("Refresh")),
-                const Center(
+                TextButton(onPressed: refreshCards, child: Text("Refresh", style: GoogleFonts.openSans(),)),
+                Center(
                   child: Padding(
                     padding: EdgeInsets.symmetric(horizontal: 20, vertical: 0),
-                    child: Text("Waiting betweeen repetitions enhances memory, but if you're in a rush you can skip to the next review"),
+                    child: Text("Waiting betweeen repetitions enhances memory training, but if you're in a rush you can skip to the next review", textAlign: TextAlign.center, style: GoogleFonts.openSans(),),
                   ),
                 ),
                 TextButton.icon(onPressed: (){
@@ -376,7 +377,7 @@ class _LearnState extends State<Learn> {
                   setState(() {
                     refreshCards();
                   });
-                }, icon: Icon(Icons.skip_next), label: Text("Skip"),),
+                }, icon: Icon(Icons.skip_next), label: Text("Skip", style: GoogleFonts.openSans(),),),
 
               ]
           )

@@ -4,6 +4,7 @@ import 'package:card_flow/launch_deck.dart';
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:card_flow/deck_data.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 
 
@@ -19,13 +20,14 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   static const List months = ['Jan', 'February', 'March', "April", 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
   bool isLoading = false;
   bool isProgressLoading = false;
-  late List<Deck> decks;
+  List<Deck> decks = [];
   List<int> cardsDueList = [];
+  List<int> deckSizeList = [];
   late DateTime sunday;
+  int streak = 0;
   int weeksBack = 0;
   late List<int> numProgressPastWeek = [0,0,0,0,0,0,0];
 
-  AppLifecycleState? _lastLifecycleState;
   final TextEditingController _addController = TextEditingController();
 
 
@@ -35,6 +37,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     WidgetsBinding.instance.addObserver(this);
     refresh();
     refreshWeeklyProgress();
+    refreshStreak();
   }
 
   @override
@@ -57,19 +60,20 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   DateTime getDate(DateTime d) => DateTime(d.year, d.month, d.day);
 
   Future refreshWeeklyProgress() async{ //returns a list of integers of the number of progress reps from that week
-    print("refresh Weekly Progress Called!");
+
     //DateTime sunday = getDate(DateTime.now().subtract(Duration(days: DateTime.now().weekday-1)));
     int dSubration;
     if(DateTime.now().weekday==DateTime.sunday){
       dSubration = 0;
     }else{
-      dSubration = DateTime.now().weekday+1;
+      dSubration = DateTime.now().weekday;
     }
     dSubration= dSubration + 7*weeksBack; //account for weeks back
     sunday = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day - dSubration);
-    print("sunday: ${sunday.toString()}");
+
+
     List<ProgressRep> weeklyProgressReps = await Data.instance.readProgress(sunday, sunday.add(const Duration(days: 6)));
-    print("WEEKLY REPS: $weeklyProgressReps");
+
     numProgressPastWeek=[0,0,0,0,0,0,0]; //position 0 is sunday, position 6 is saturday
     for(ProgressRep rep in weeklyProgressReps){
       //datetime weekdays mondays are 1 and sundays are 7
@@ -81,6 +85,23 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     }
   }
 
+  Future refreshStreak() async{
+    DateTime today = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
+    bool done = false;
+    int i = -1;
+    while(!done){
+      //print("between: ${today.subtract(Duration(days: i+1))} and ${today.subtract(Duration(days: i)).subtract(Duration(milliseconds: 1))}");
+      List<ProgressRep> progress = await Data.instance.readProgress(today.subtract(Duration(days: i+1)), today.subtract(Duration(days: i)).subtract(const Duration(milliseconds: 1)));
+      //print("progress: $progress");
+      if(progress.isEmpty){
+        done = true;
+      }else{
+        i++;
+      }
+    }
+    streak = i+1;
+  }
+
   Future refresh() async {
     setState(() {
       isLoading = true;
@@ -89,9 +110,12 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     decks = await Data.instance.readDecks();
 
     cardsDueList = [];
+    deckSizeList = [];
     for(Deck d in decks){
+      List<Flashcard> cardsList = await d.getCards();
       List<int> dueIDs = await d.getCardsDueIDs();
       cardsDueList.add(dueIDs.length);
+      deckSizeList.add(cardsList.length);
     }
 
     setState(() => isLoading = false);
@@ -104,7 +128,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     });
   }
   void dateForward(){
-    if(daysBetween(DateTime.now(), sunday)<0) {
+    print(sunday);
+    print(weeksBack);
+    if(daysBetween(DateTime.now(), sunday)<=-7) {
       setState(() {
         weeksBack--;
         refreshWeeklyProgress();
@@ -126,7 +152,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       barrierDismissible: true,
       builder: (context){
         return AlertDialog(
-          title: Text("Create new deck"),
+          title: Text("Create new deck", style: GoogleFonts.openSans(),),
           content: SingleChildScrollView(
             child:
             Column(
@@ -135,21 +161,21 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                   onChanged: (value){
 
                   },
+                  style: GoogleFonts.openSans(),
                   controller: _addController,
-                  decoration: InputDecoration(hintText: "Enter deck name here"),
+                  decoration: const InputDecoration(hintText: "Enter deck name here"),
                 ),
                 TextButton(onPressed: (){
-                  if(_addController?.text!=null){
-                    String? retrieved = _addController?.text;
-                    Deck newDeck = Deck(name: retrieved!, dateCreated: DateTime.now());
-                    Data.instance.createDeck(newDeck);
-                    setState(() {
-                      refresh();
-                    });
-                    Navigator.of(context).pop();
-                  }
+                  String? retrieved = _addController.text;
+                  _addController.clear();
+                  Deck newDeck = Deck(name: retrieved, dateCreated: DateTime.now());
+                  Data.instance.createDeck(newDeck);
+                  setState(() {
+                    refresh();
+                  });
+                  Navigator.of(context).pop();
 
-                }, child: Text("Create"))
+                }, child: Text("Create", style: GoogleFonts.openSans(),))
               ],
             ),
           )
@@ -164,7 +190,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     return Scaffold(
       resizeToAvoidBottomInset: false,
       backgroundColor: Colors.white,
-      floatingActionButton: FloatingActionButton(onPressed: ()=>_showCreateDeckDialog(),child: Icon(Icons.add),),
+      floatingActionButton: FloatingActionButton(onPressed: ()=>_showCreateDeckDialog(),child: const Icon(Icons.add),),
       body: Center(child:
       Column(
         children: [
@@ -172,51 +198,30 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             padding: EdgeInsets.fromLTRB(0, 75, 0, 0),
             child: Image(image: AssetImage('assets/cflow_logo.png')),
           ),
-          const Padding(padding: EdgeInsets.fromLTRB(0, 0, 0, 16), child:
-          Text("🔥12", style: TextStyle(fontSize: 18),)
-            ,),
-          const Text(""),
+          Padding(padding: const EdgeInsets.fromLTRB(0, 0, 0, 16), child:
+          (streak>0)?Text("🔥$streak", style: GoogleFonts.openSans(fontSize: 18),):Container(),
+            ),
+          const Text("",),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             mainAxisSize: MainAxisSize.max,
             children: [
-              // Padding(
-              //   padding: EdgeInsets.symmetric(horizontal: 8),
-              //   child: SizedBox(
-              //     width: 50,
-              //     child: ElevatedButton(
-              //     onPressed: (){
-              //       dateBack();
-              //     }, child: Center(child: Icon(Icons.arrow_back_ios, size: 15,))
-              //     ),
-              //   ),
-              // ),
               Expanded(child: Center(
-                child: Text("${months[sunday.month-1]} ${sunday.day} - ${sunday.add(Duration(days: 6)).day}",
-                style: TextStyle(fontFamily: "Lexend", fontSize: 16),),
+                child: Text("${months[sunday.month-1]} ${sunday.day} - ${sunday.add(const Duration(days: 6)).day}",
+                style: GoogleFonts.openSans(fontSize: 16),),
               )),
-              // Padding(
-              //   padding: const EdgeInsets.symmetric(horizontal: 8.0),
-              //   child: SizedBox(
-              //     width: 50,
-              //     child: ElevatedButton(onPressed: (){
-              //       dateForward();
-              //     }, child: Center(child: Icon(Icons.arrow_forward_ios, size: 15 ,)),
-              //     ),
-              //   ),
-              // ),
             ],
           )
           ,Row(
             children: [
               Padding(
-                padding: EdgeInsets.fromLTRB(8,0,0,0),
+                padding: const EdgeInsets.fromLTRB(8,0,0,0),
                 child:
                 SizedBox(
                   width: 20,
                   height: 20,
                   child: IconButton(
-                    padding: EdgeInsets.all(0),
+                    padding: const EdgeInsets.all(0),
                     icon: const Icon(Icons.arrow_back_ios),
                     onPressed: (){
                       dateBack();
@@ -251,14 +256,14 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                 ),
               ),
               Padding(
-                padding: EdgeInsets.fromLTRB(0,0,8,0),
+                padding: const EdgeInsets.fromLTRB(0,0,8,0),
                 child:
                   SizedBox(
                   width: 20,
                   height: 20,
                   child: IconButton(
-                    padding: EdgeInsets.all(0),
-                    icon: Icon(Icons.arrow_forward_ios, color: (daysBetween(DateTime.now(), sunday)<0)? Colors.black:Colors.grey[300],),
+                    padding: const EdgeInsets.all(0),
+                    icon: Icon(Icons.arrow_forward_ios, color: (daysBetween(DateTime.now(), sunday)<=-7)? Colors.black:Colors.grey[300],),
                     onPressed: (){
                       dateForward();
                     },
@@ -270,9 +275,14 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           Expanded(
             child: Material(
                 color: Colors.white,
-                child: isLoading ? const Center(child: CircularProgressIndicator()) : deckListBuilder()
+                child:
+                ((decks.isNotEmpty) ? (isLoading ? const Center(child: CircularProgressIndicator()) :deckListBuilder()):
+                Center(child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Text(textAlign: TextAlign.center, "No decks have been created yet. Tap the plus button to create a deck.", style: GoogleFonts.openSans(color: Colors.grey[500]),),
+                )))
             ),
-          ), //this will be to display the caards
+          ), //this will be to display the cards
 
         ],
       )
@@ -282,20 +292,24 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   Widget deckListBuilder() {
     return RefreshIndicator(
-      onRefresh: ()=>refresh(),
+      onRefresh: () async{
+        refresh();
+        refreshStreak();
+        refreshWeeklyProgress();
+      },
       child:
       ListView.builder(
-        padding: EdgeInsets.fromLTRB(0,0,0,75),
+        padding: const EdgeInsets.fromLTRB(0,0,0,75),
         shrinkWrap: true,
           itemCount: decks.length,
           itemBuilder: (context, index) {
             return ListTile(
               onTap: () async {
-                final value = await Navigator.pushNamed(context, LaunchDeck.routeName, arguments: decks[index]);
+                await Navigator.pushNamed(context, LaunchDeck.routeName, arguments: decks[index]);
                 setState(() {
                   refresh();
                   refreshWeeklyProgress();
-                  print("HOMESCREEN called");
+                  refreshStreak();
                 });
               },
               contentPadding: const EdgeInsets.symmetric(
@@ -313,13 +327,21 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                           height: 16,
                           child: FittedBox(
                             fit: BoxFit.fitWidth,
-                            child: Text(cardsDueList[index].toString()),
+                            child: Text(deckSizeList[index].toString(), style: GoogleFonts.openSans(),),
                           ),
                         )
                     ),
                   ]
               ),
-              title: Text(decks[index].name),
+              trailing: (cardsDueList[index]>0)?Padding(
+                padding: const EdgeInsets.fromLTRB(0, 0, 8, 0),
+                child: Container(
+                    width: 10,
+                    height: 10,
+                    decoration: const BoxDecoration(color: Colors.blue, shape: BoxShape.circle)
+                ),
+              ):null,
+              title: Text(decks[index].name, style: GoogleFonts.openSans(),),
             );
           }
       ),
@@ -351,15 +373,13 @@ class _BarChart extends StatelessWidget {
   }
 
   Widget getTitles(double value, TitleMeta meta){
-    const textStyleBold = TextStyle(
+    var textStyleBold = GoogleFonts.openSans(
         color: Colors.black,
-        fontFamily: "Lexend",
         fontWeight: FontWeight.bold,
         fontSize: 16,
     );
-    const textStyle = TextStyle(
+    var textStyle = GoogleFonts.openSans(
       color: Colors.black,
-      fontFamily: "Lexend",
       fontSize: 16,
     );
 

@@ -5,6 +5,7 @@ import 'dart:typed_data';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import 'package:image_painter/image_painter.dart';
 //import 'package:card_flow/flutter_image_painter_fork/lib/image_painter.dart'; //TODO this package should be deleted entirely from your project eventually because it gets it from github instead
@@ -54,7 +55,7 @@ class _DispAndMaskState extends State<DispAndMaskScreen> {
     await Data.instance.createFlashcard(Flashcard(finalImage,baseImage, isImage: true, deckID: widget.deck.id));
 
     ScaffoldMessenger.of(context)
-        .showSnackBar(SnackBar(content: Text('Saved.')));
+        .showSnackBar(SnackBar(content: Text('Saved.', style: GoogleFonts.openSans(),)));
 
 
   }
@@ -65,14 +66,14 @@ class _DispAndMaskState extends State<DispAndMaskScreen> {
       barrierDismissible: false, // user must tap button!
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Are you sure you want to quit?'),
-          content: const SingleChildScrollView(
-              child: Text("If you exit, you will lose your progress and your card will not be saved.")
+          title: Text('Are you sure you want to quit?', style: GoogleFonts.openSans(),),
+          content: SingleChildScrollView(
+              child: Text("If you exit, you will lose your progress and your card will not be saved.", style: GoogleFonts.openSans(),)
           ),
           actions: <Widget>[
             TextButton(
               autofocus: true,
-              child: const Text('NO'),
+              child: Text('NO', style: GoogleFonts.openSans(),),
               onPressed: () {
                 Navigator.of(context).pop();
               },
@@ -84,7 +85,7 @@ class _DispAndMaskState extends State<DispAndMaskScreen> {
 
 
                 },
-                child: const Text("YES")
+                child: Text("YES", style: GoogleFonts.openSans(),)
             ),
           ],
         );
@@ -124,7 +125,7 @@ class _DispAndMaskState extends State<DispAndMaskScreen> {
       appBar: AppBar(
         leading: Padding(
           padding: const EdgeInsets.fromLTRB(4,0,0,0),
-          child: TextButton(child: const Text("Done", style: TextStyle(color: Colors.white),),
+          child: TextButton(child: Text("Done", style: GoogleFonts.openSans(color: Colors.white),),
             onPressed: ()=>Navigator.pushNamedAndRemoveUntil(context, LaunchDeck.routeName, ModalRoute.withName('/'), arguments: widget.deck)),
         ),
           // onPressed: (){
@@ -141,14 +142,19 @@ class _DispAndMaskState extends State<DispAndMaskScreen> {
         mainAxisSize: MainAxisSize.min,
         children: [
           Flexible(
-            flex: 3,
+            flex: 4,
             child: currentPainter
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Text(textAlign: TextAlign.center,"Mask out the part of the image you want to hide until you flip the flashcard", style: GoogleFonts.openSans(),),
           ),
           Flexible(
             child: Container(
               alignment: Alignment.center,
                 child: SizedBox(
-                    child: TextButton(onPressed: (){
+                    child: ElevatedButton.icon(
+                      onPressed: (){
                       setState(() {
                         saveImage();
 
@@ -158,7 +164,8 @@ class _DispAndMaskState extends State<DispAndMaskScreen> {
                         // numClears++; ///increase the numClears so that a cleared image painter is constructed
                         // currentPainter.createState();
                       });
-                    }, child: const Text("Create New Card"))
+                    }, icon: const Icon(Icons.add),
+                    label: Text("Create New Card", style: GoogleFonts.openSans(),))
                 )
             ),
           )
