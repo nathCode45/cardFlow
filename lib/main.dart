@@ -27,8 +27,16 @@ void main() async {
 
 
 
-  Flashcard card1 = Flashcard(deckID: sampleDeck.id,'[{"insert":"How does CardFlow help you learn?\n"}]', '[{"insert":"CardFlow optimizes the timing of information recall using a spaced repetition algorithm"},{"insert":"\n","attributes":{"block":"ul"}},{"insert":"This works by presenting you with flashcards at increasing intervals of time, based on how well you remember it"},{"insert":"\n","attributes":{"block":"ul"}},{"insert":"If you recall the flashcard easily, the algorithm will wait longer before asking you to recall it again"},{"insert":"\n","attributes":{"block":"ul"}},{"insert":"If you struggle to recall the flashcard, the algorithm will present the information to you again sooner"},{"insert":"\n","attributes":{"block":"ul"}},{"insert":"The algorithm will adapt to your individual learning style and pace"},{"insert":"\n","attributes":{"block":"ul"}},{"insert":"This approach helps to ensure that you spend your time and energy on the information that you need to focus on the most"},{"insert":"\n","attributes":{"block":"ul"}}]');
-  //await Data.instance.createFlashcard(card1);
+  Flashcard card1 = Flashcard(deckID: sampleDeck.id,
+      '[{"insert":"How does CardFlow help you learn?\\n"}]','[{"insert":"CardFlow optimizes the timing of information recall using a spaced repetition algorithm"},{"insert":"\\n","attributes":{"block":"ul"}},{"insert":"This works by presenting you with flashcards at increasing intervals of time, based on how well you remember it"},{"insert":"\\n","attributes":{"block":"ul"}},{"insert":"If you recall the flashcard easily, the algorithm will wait longer before asking you to recall it again"},{"insert":"\\n","attributes":{"block":"ul"}},{"insert":"If you struggle to recall the flashcard, the algorithm will present the information to you again sooner"},{"insert":"\\n","attributes":{"block":"ul"}},{"insert":"The algorithm will adapt to your individual learning style and pace"},{"insert":"\\n","attributes":{"block":"ul"}},{"insert":"This approach helps to ensure that you spend your time and energy on the information that you need to focus on the most"},{"insert":"\\n","attributes":{"block":"ul"}}]'
+  );
+  Flashcard card2 = Flashcard(deckID: sampleDeck.id, '[{"insert":"Tips for creating good flashcards\\n"}]',
+  '[{"insert":"Keep it simple: use short and concise sentences/phrases—break up larger peices of information into multiple flashcards of shorter chunks"},{"insert":"\\n","attributes":{"block":"ol"}},{"insert":"Understand your cards before you try to memorize them"},{"insert":"\\n","attributes":{"block":"ol"}},{"insert":"Try using mnemonics and acronyms"},{"insert":"\\n","attributes":{"block":"ol"}}]');
+
+
+  //Flashcard card1 = Flashcard(, deckID: sampleDeck.id);
+  await Data.instance.createFlashcard(card1);
+  await Data.instance.createFlashcard(card2);
   // await Data.instance.createFlashcard(Flashcard.fromPlainText("Argentina", "Buenos Aires", deckID: southAmerica.id ));
   // await Data.instance.createFlashcard(Flashcard.fromPlainText("Bolivia", "La Paz Sucre", deckID: southAmerica.id));
   // await Data.instance.createFlashcard(Flashcard.fromPlainText("Brazil", "Brasilia", deckID: southAmerica.id));

@@ -172,6 +172,11 @@ class Flashcard{
     return Flashcard(front?? this.front, back??this.back, id: id?? this.id, deckID: deckID ?? this.deckID);
   }
 
+  @override
+  String toString(){
+    return 'front: $front\nback: $back';
+  }
+
 }
 
 

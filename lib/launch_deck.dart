@@ -119,7 +119,7 @@ class _LaunchDeckState extends State<LaunchDeck> {
                     ]))),
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 32.0),
-              child: OutlinedButton(onPressed: () async {
+              child: CupertinoButton(onPressed: () async {
 
                 if(cards.isNotEmpty){
                   final value = await Navigator.push(context, MaterialPageRoute(builder: (context) => Learn(deck: args)));

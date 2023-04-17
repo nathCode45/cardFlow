@@ -1,11 +1,18 @@
 import 'dart:convert';
 
 import 'dart:io' as Io;
+import 'dart:io';
 import 'package:camera/camera.dart';
+import 'package:camerawesome/camerawesome_plugin.dart';
+import 'package:camerawesome/pigeon.dart';
 import 'package:card_flow/disp_and_mask2.dart';
 import 'package:card_flow/display_and_mask.dart';
+import 'package:path/path.dart' as path;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:image_cropper/image_cropper.dart';
+
 
 import 'deck_data.dart';
 //TODO WARNING:
@@ -29,7 +36,7 @@ class _ImageCardScreenState extends State<ImageCardScreen> {
     // TODO: implement initState
     super.initState();
 
-    _controller = CameraController(widget.camera, ResolutionPreset.medium, imageFormatGroup: ImageFormatGroup.yuv420);
+    _controller = CameraController(widget.camera, ResolutionPreset.high, imageFormatGroup: ImageFormatGroup.yuv420);
 
     _initializeControllerFuture = _controller.initialize();
   }
@@ -42,6 +49,19 @@ class _ImageCardScreenState extends State<ImageCardScreen> {
 
     super.dispose();
   }
+
+  // Future<String> _resizePhoto(String filePath) async {
+  //   ImageProperties properties =
+  //   await FlutterNativeImage.getImageProperties(filePath);
+  //
+  //   int width = properties.width;
+  //   var offset = (properties.height - properties.width) / 2;
+  //
+  //   File croppedFile = await FlutterNativeImage.cropImage(
+  //       filePath, 0, offset.round(), width, width);
+  //
+  //   return croppedFile.path;
+  // }
 
 
 
@@ -58,8 +78,24 @@ class _ImageCardScreenState extends State<ImageCardScreen> {
         FutureBuilder<void>(
           future: _initializeControllerFuture,
           builder: (context, snapshot) {
+            double sizeBy = (portrait)? MediaQuery.of(context).size.width: MediaQuery.of(context).size.height;
             if (snapshot.connectionState == ConnectionState.done) {
-              return CameraPreview(_controller);
+              return Container(
+                width: (portrait)?sizeBy:sizeBy+200,
+                height: (portrait)?sizeBy+200:sizeBy,
+                child: ClipRect(
+                  child: OverflowBox(
+                    alignment: Alignment.center,
+                    child: FittedBox(
+                      fit: (portrait)?BoxFit.fitWidth: BoxFit.fitHeight,
+                      child: Container(
+                          width: sizeBy,
+                          child: CameraPreview(_controller)
+                      ),
+                    ),
+                  ),
+                ),
+              );
             } else {
               return const Center(
                 child: CircularProgressIndicator(),
@@ -73,13 +109,47 @@ class _ImageCardScreenState extends State<ImageCardScreen> {
                 onPressed: () async {
                   try {
                     await _initializeControllerFuture;
+                    _controller;
 
                     final image = await _controller.takePicture();
+
+                    CroppedFile? croppedFile = await ImageCropper().cropImage(
+                      sourcePath: image.path,
+                      aspectRatioPresets: [
+                        CropAspectRatioPreset.square,
+                        CropAspectRatioPreset.ratio3x2,
+                        CropAspectRatioPreset.original,
+                        CropAspectRatioPreset.ratio4x3,
+                        CropAspectRatioPreset.ratio16x9
+                      ],
+                      uiSettings: [
+                        AndroidUiSettings(
+                            toolbarTitle: 'Cropper',
+                            toolbarColor: Colors.deepOrange,
+                            toolbarWidgetColor: Colors.white,
+                            initAspectRatio: CropAspectRatioPreset.original,
+                            lockAspectRatio: false),
+                        IOSUiSettings(
+                          title: 'Cropper',
+                        ),
+                        WebUiSettings(
+                          context: context,
+                        ),
+                      ],
+                    );
+                    String path = "";
+
+                    if(croppedFile!=null){
+                      path = croppedFile.path;
+                    }else{
+                      path = image.path;
+                    }
+
 
                     if (!mounted) return;
                     await Navigator.of(context).pushReplacement(MaterialPageRoute(
                         builder: (context) => DispAndMaskScreen(
-                          baseImagePath: image.path,
+                          baseImagePath: path,
                           deck: widget.deck,
                         )));
                   } catch (e) {
@@ -104,23 +174,98 @@ class _ImageCardScreenState extends State<ImageCardScreen> {
       ];
     }
 
+    // String imagePathFinal = "";
+    // MediaCapture? currentCapture;
+    // bool done = false;
+
+
+
+
+    // return CameraAwesomeBuilder.awesome(
+    //   exifPreferences: ExifPreferences(saveGPSLocation: false),
+    //   progressIndicator: const Center(child: CircularProgressIndicator()),
+    //   onImageForAnalysis: (image) async{
+    //     if(done){
+    //         if (!mounted) return;
+    //         await Navigator.of(context).pushReplacement(MaterialPageRoute(
+    //             builder: (context) => DispAndMaskScreen(
+    //               baseImagePath: imagePathFinal,
+    //               deck: widget.deck,
+    //             )));
+    //         done = false;
+    //
+    //     }
+    //
+    //
+    //
+    //   },
+    //     saveConfig: SaveConfig.photo(
+    //         pathBuilder: () async{
+    //   Directory d = await getApplicationDocumentsDirectory();
+    //   String path = d.path;
+    //
+    //   imagePathFinal = '$path/image.jpg';
+    //
+    //   done = true;
+    //   print("called");
+    //
+    //
+    //   return imagePathFinal;
+    //
+    // },
+    // ),
+    // );
+
+    // return CameraAwesomeBuilder.custom(
+    //   builder: (cameraState, previewSize, previewRect){
+    //     return cameraState.when(
+    //       on
+    //     );
+    //   }, saveConfig: SaveConfig.photo(
+    //         pathBuilder: () async{
+    //           Directory d = await getApplicationDocumentsDirectory();
+    //           String path = d.path;
+    //
+    //           return '$path/image.jpg';
+    //
+    //         },
+    //       ),
+    // );
+
+    // return OrientationBuilder(
+    //     builder: (BuildContext context, Orientation orientation) {
+    //       return
+    //       Scaffold(
+    //         backgroundColor: Colors.black12,
+    //         appBar: (orientation==Orientation.portrait)?AppBar(backgroundColor: Colors.black12,):null,
+    //         body: (orientation==Orientation.portrait)?
+    //         SafeArea(
+    //           child: Column(
+    //             children: _camChildren(true)
+    //           ),
+    //         ):SafeArea(child: Row(
+    //             children: _camChildren(false)
+    //         )),
+    //       );
+    //     },
+    // );
 
     return OrientationBuilder(
-        builder: (BuildContext context, Orientation orientation) {
-          return
+      builder: (BuildContext context, Orientation orientation) {
+        return
           Scaffold(
             backgroundColor: Colors.black12,
             appBar: (orientation==Orientation.portrait)?AppBar(backgroundColor: Colors.black12,):null,
             body: (orientation==Orientation.portrait)?
             SafeArea(
               child: Column(
-                children: _camChildren(true)
+                  children: _camChildren(true)
               ),
             ):SafeArea(child: Row(
                 children: _camChildren(false)
             )),
           );
-        },
+      },
     );
 
 

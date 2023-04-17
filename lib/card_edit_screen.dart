@@ -202,7 +202,7 @@ class _CardEditState extends State<CardEdit> {
                       border: Border.all(width: 1.0, color: Colors.black)), child:
                   Padding(
                     padding: const EdgeInsets.fromLTRB(8,2,8,2),
-                    child: ZefyrEditor(controller: _controller!,
+                    child: ZefyrEditor(controller: _controller!, textCapitalization: TextCapitalization.none,
                       ),
                   ))),
                 ),
@@ -219,7 +219,7 @@ class _CardEditState extends State<CardEdit> {
                       border: Border.all(width: 1.0, color: Colors.black)), child:
                   Padding(
                     padding: const EdgeInsets.only(left: 8),
-                    child: ZefyrEditor(controller: _controller2!
+                    child: ZefyrEditor(controller: _controller2!, textCapitalization: TextCapitalization.none
                       ,),
                   ))),
                 ),
@@ -288,7 +288,7 @@ class _CardEditState extends State<CardEdit> {
       //print("$contents/n$contents2");
       args.card.deckID = args.selectedDeckID;
       await Data.instance.updateFlashcard(args.card);
-      //print(args.card);
+      print(args.card);
     }
 
     ScaffoldMessenger.of(context)

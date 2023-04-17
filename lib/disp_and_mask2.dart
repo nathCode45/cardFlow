@@ -52,6 +52,8 @@ class _DispAndMaskState extends State<DispAndMaskScreen> {
     imgFile.writeAsBytesSync(image!);
     String finalImage = base64Encode(imgFile.readAsBytesSync());
     String baseImage = base64Encode(File(widget.baseImagePath).readAsBytesSync());
+    print('front: $finalImage');
+    print('back: $baseImage');
     await Data.instance.createFlashcard(Flashcard(finalImage,baseImage, isImage: true, deckID: widget.deck.id));
 
     ScaffoldMessenger.of(context)
