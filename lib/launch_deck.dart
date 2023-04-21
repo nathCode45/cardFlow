@@ -198,47 +198,52 @@ class _LaunchDeckState extends State<LaunchDeck> {
     if(cards!=null){ ///potential issues could occur if deck.cards changes
       return Container(
         decoration: const BoxDecoration(border: Border(top:BorderSide(width: 1.0, color: Colors.black))),
-        child: ListView.builder(itemCount: cards.length,itemBuilder: (context, index){
-          if(cards[index]!=null) {
-            String front = (cards[index].isImage==null ||(cards[index].isImage!=null && cards[index].isImage==false))? _shorten(NotusDocument.fromJson(jsonDecode(cards[index].front)).toPlainText())
-            : "Image";//decodes Notus Document stored through JSON in SQL database
-            return ListTile(
-              contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 6, vertical: 18.0),
-              shape: const ContinuousRectangleBorder(side: BorderSide(
-                  color: Colors.black12, width: 1)),
-              leading: const Image(image: AssetImage(
-                  'assets/card_icon.png')),
-              title: (cards[index].isImage==null ||(cards[index].isImage!=null && cards[index].isImage==false))?
-              Text(front, style: GoogleFonts.openSans(),):
-              Align(
-                alignment: Alignment.topLeft,
-                child: SizedBox(
-                  width: 45,
-                    height: 45,
-                    child: ClipRRect(
-                        borderRadius: BorderRadius.circular(4),
-                        child: Image.memory(base64Decode(cards[index].front), fit: BoxFit.cover,)) //TODO load the image in a lower resolution
+        child: RefreshIndicator(
+          onRefresh: () async{
+            refreshCards();
+          },
+          child: ListView.builder(itemCount: cards.length,itemBuilder: (context, index){
+            if(cards[index]!=null) {
+              String front = (cards[index].isImage==null ||(cards[index].isImage!=null && cards[index].isImage==false))? _shorten(NotusDocument.fromJson(jsonDecode(cards[index].front)).toPlainText())
+              : "Image";//decodes Notus Document stored through JSON in SQL database
+              return ListTile(
+                contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 6, vertical: 18.0),
+                shape: const ContinuousRectangleBorder(side: BorderSide(
+                    color: Colors.black12, width: 1)),
+                leading: const Image(image: AssetImage(
+                    'assets/card_icon.png')),
+                title: (cards[index].isImage==null ||(cards[index].isImage!=null && cards[index].isImage==false))?
+                Text(front, style: GoogleFonts.openSans(),):
+                Align(
+                  alignment: Alignment.topLeft,
+                  child: SizedBox(
+                    width: 45,
+                      height: 45,
+                      child: ClipRRect(
+                          borderRadius: BorderRadius.circular(4),
+                          child: Image.memory(base64Decode(cards[index].front), fit: BoxFit.cover,)) //TODO load the image in a lower resolution
+                  ),
                 ),
-              ),
-              onTap: (cards[index].isImage==null ||(cards[index].isImage!=null && cards[index].isImage==false))?
-              () async {
-                await Navigator.pushNamed(context, CardEdit.routeName, arguments: CardEditScreenArguments(selectedDeckID: args.id!, card: cards[index]));
-                setState(() {
-                  refreshCards();
-                });
-              }:
-                  ()async {
-                    await Navigator.pushNamed(context, ImageCardViewScreen.routeName, arguments: cards[index]);
-                    setState(() {
-                      refreshCards();
-                    });
-                  }
-            );
-          }else{
-            return Container();
-          }
-        }),
+                onTap: (cards[index].isImage==null ||(cards[index].isImage!=null && cards[index].isImage==false))?
+                () async {
+                  await Navigator.pushNamed(context, CardEdit.routeName, arguments: CardEditScreenArguments(selectedDeckID: args.id!, card: cards[index]));
+                  setState(() {
+                    refreshCards();
+                  });
+                }:
+                    ()async {
+                      await Navigator.pushNamed(context, ImageCardViewScreen.routeName, arguments: cards[index]);
+                      setState(() {
+                        refreshCards();
+                      });
+                    }
+              );
+            }else{
+              return Container();
+            }
+          }),
+        ),
       );
     }else{
       return Text("No cards yet", style: GoogleFonts.openSans(),);

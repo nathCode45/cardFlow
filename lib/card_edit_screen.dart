@@ -152,6 +152,9 @@ class _CardEditState extends State<CardEdit> {
             (isExistingCard)? _decodeCardTitle(args.card) : args.card!.front,
             style: GoogleFonts.getFont('Open Sans'),
           ),
+          actions: [(isExistingCard)?IconButton(icon: const Icon(Icons.delete), onPressed:() async{
+            _showDeleteDialog();
+         }):Container()],
         ),
         backgroundColor: Colors.white,
         body: Padding(
@@ -243,29 +246,30 @@ class _CardEditState extends State<CardEdit> {
                     ),
                   ),
                 ),
-                (isExistingCard)?Center(
-                    child: Container(
-                      width: 125,
-                      child: ElevatedButton(
-                        style: ButtonStyle(
-                            backgroundColor: MaterialStateProperty.all<Color>(
-                                Colors.grey[700]!),
-                            foregroundColor: MaterialStateProperty.all<Color>(
-                                Colors.white)
-                        ),
-                        onPressed: ()=>_showDeleteDialog(),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.max,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Icon(Icons.delete),
-                            const SizedBox(width: 8,),
-                            Text("Delete", style: GoogleFonts.openSans(),),
-                          ],
-                        ),
-                      ),
-                    )
-                ):Container()
+                Container(height: 80,)
+                // (isExistingCard)?Center(
+                //     child: Container(
+                //       width: 125,
+                //       child: ElevatedButton(
+                //         style: ButtonStyle(
+                //             backgroundColor: MaterialStateProperty.all<Color>(
+                //                 Colors.grey[700]!),
+                //             foregroundColor: MaterialStateProperty.all<Color>(
+                //                 Colors.white)
+                //         ),
+                //         onPressed: ()=>_showDeleteDialog(),
+                //         child: Row(
+                //           mainAxisSize: MainAxisSize.max,
+                //           mainAxisAlignment: MainAxisAlignment.center,
+                //           children: [
+                //             const Icon(Icons.delete),
+                //             const SizedBox(width: 8,),
+                //             Text("Delete", style: GoogleFonts.openSans(),),
+                //           ],
+                //         ),
+                //       ),
+                //     )
+                // ):Container()
               ],
             ),
           ),

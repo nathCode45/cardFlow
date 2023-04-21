@@ -113,7 +113,7 @@ class _ImageCardScreenState extends State<ImageCardScreen> {
                                   ],
                                   uiSettings: [
                                     AndroidUiSettings(
-                                        toolbarTitle: 'Crop your image',
+                                        toolbarTitle: 'Crop/Adjust your image',
                                         toolbarColor: Colors.deepOrange,
                                         toolbarWidgetColor: Colors.white,
                                         initAspectRatio: CropAspectRatioPreset.original,
@@ -123,21 +123,22 @@ class _ImageCardScreenState extends State<ImageCardScreen> {
                                     ),
                                   ],
                                 );
+
+
                                 String path = "";
 
-                                if(croppedFile!=null){
-                                  path = croppedFile.path;
-                                }else{
-                                  path = image.path;
-                                }
 
 
                                 if (!mounted) return;
-                                await Navigator.of(context).pushReplacement(MaterialPageRoute(
-                                    builder: (context) => DispAndMaskScreen(
-                                      baseImagePath: path,
-                                      deck: widget.deck,
-                                    )));
+                                if(croppedFile!=null){
+                                  path = croppedFile.path;
+                                  await Navigator.of(context).pushReplacement(MaterialPageRoute(
+                                      builder: (context) => DispAndMaskScreen(
+                                        baseImagePath: path,
+                                        deck: widget.deck,
+                                      )));
+                                }
+
                               } catch (e) {
                                 print(e);
                               }

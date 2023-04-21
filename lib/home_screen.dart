@@ -47,15 +47,15 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     super.dispose();
   }
 
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    // TODO: implement didChangeAppLifecycleState
-    super.didChangeAppLifecycleState(state);
-
-    if(state == AppLifecycleState.detached){
-      Data.instance.deleteAllDecks();
-    }
-  }
+  // @override
+  // void didChangeAppLifecycleState(AppLifecycleState state) {
+  //   // TODO: implement didChangeAppLifecycleState
+  //   super.didChangeAppLifecycleState(state);
+  //
+  //   if(state == AppLifecycleState.detached){
+  //     Data.instance.deleteAllDecks();
+  //   }
+  // }
 
   DateTime getDate(DateTime d) => DateTime(d.year, d.month, d.day);
 
@@ -107,7 +107,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       isLoading = true;
     });
 
-    decks = await Data.instance.readDecks();
+    try {
+      decks = await Data.instance.readDecks();
+    }catch(e){
+      decks = [];
+    }
 
     cardsDueList = [];
     deckSizeList = [];
@@ -167,13 +171,20 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                 ),
                 TextButton(onPressed: (){
                   String? retrieved = _addController.text;
-                  _addController.clear();
-                  Deck newDeck = Deck(name: retrieved, dateCreated: DateTime.now());
-                  Data.instance.createDeck(newDeck);
-                  setState(() {
-                    refresh();
-                  });
-                  Navigator.of(context).pop();
+
+                  if(retrieved!=""){
+                    _addController.clear();
+                    Deck newDeck = Deck(name: retrieved, dateCreated: DateTime.now());
+                    Data.instance.createDeck(newDeck);
+                    setState(() {
+                      refresh();
+                    });
+                    Navigator.of(context).pop();
+                  }else{
+                    ScaffoldMessenger.of(context)
+                        .showSnackBar(const SnackBar(content: Text('Please enter a deck name')));
+                  }
+
 
                 }, child: Text("Create", style: GoogleFonts.openSans(),))
               ],

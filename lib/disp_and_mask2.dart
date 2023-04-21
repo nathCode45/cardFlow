@@ -44,6 +44,11 @@ class _DispAndMaskState extends State<DispAndMaskScreen> {
 
   void saveImage() async{
 
+    if(context.mounted){
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Saved.', style: GoogleFonts.openSans(),)));
+    }
+
     final image = await _imageKey.currentState?.exportImage();
     final directory = (await getApplicationDocumentsDirectory()).path;
     await Directory('$directory/sample').create(recursive: true);
@@ -53,14 +58,9 @@ class _DispAndMaskState extends State<DispAndMaskScreen> {
     imgFile.writeAsBytesSync(image!);
     String finalImage = base64Encode(imgFile.readAsBytesSync());
     String baseImage = base64Encode(File(widget.baseImagePath).readAsBytesSync());
-    print('front: $finalImage');
-    print('back: $baseImage');
     await Data.instance.createFlashcard(Flashcard(finalImage,baseImage, isImage: true, deckID: widget.deck.id));
 
-    if(context.mounted){
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('Saved.', style: GoogleFonts.openSans(),)));
-    }
+
 
 
   }
@@ -128,24 +128,25 @@ class _DispAndMaskState extends State<DispAndMaskScreen> {
     return Scaffold(
       key: _key,
       appBar: AppBar(
-        leading: Padding(
+        automaticallyImplyLeading: false,
+        leadingWidth: 75,
+        actions: [Padding(
           padding: const EdgeInsets.fromLTRB(4,0,0,0),
-          child: TextButton(child: Text("Done", style: Theme.of(context).textTheme.bodySmall),// GoogleFonts.openSans(color: Colors.white),),
+          child: TextButton(child: Text("Done", style: GoogleFonts.openSans(color: Colors.white, fontWeight: FontWeight.bold)),// GoogleFonts.openSans(color: Colors.white),),
             onPressed: ()=>Navigator.pushNamedAndRemoveUntil(context, LaunchDeck.routeName, ModalRoute.withName('/'), arguments: widget.deck)),
-        ),
+        )],
           // onPressed: (){
           // (isNewEdits)?
           //   _showExitDialog():
           //   Navigator.pushNamedAndRemoveUntil(context, LaunchDeck.routeName, ModalRoute.withName('/'), arguments: widget.deck);
           // }),
-        actions: [
-          //IconButton(onPressed: (){saveImage();}, icon: const Icon(Icons.save))
-        ],
+
       ), //TODO make this so that
       //Todo ...it warns if not saved
       body: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
+
           Flexible(
             flex: 4,
             child: currentPainter

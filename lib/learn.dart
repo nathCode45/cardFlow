@@ -155,27 +155,76 @@ class _LearnState extends State<Learn> {
 
   Widget cardSide(String? side){
     return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Container(
-        clipBehavior: Clip.hardEdge,
-        decoration: BoxDecoration(
+        padding: const EdgeInsets.all(16.0),
+        child:
+        ClipRRect(
           borderRadius: BorderRadius.circular(15),
-          color: const Color(0xFF000000),
-          border: Border.all(color: Colors.black26, width: 2),
-        ),
-        child: Center(
-            child: InteractiveViewer(
-              maxScale: 10,
-              clipBehavior: Clip.none,
-              child: Image.memory(
-                base64Decode(side!),
-                fit: BoxFit.fitWidth,
-              ),
-            )
-        ),
-      ),
+          child:
+          Stack(
+              children: [
+                Center(
+                  child: Container(
+                    width: double.infinity,
+                    height: 500,
+                    color: const Color(0xFF000000),
+                    // decoration: BoxDecoration(
+                    //   borderRadius: BorderRadius.circular(15),
+                    //   color: const Color(0xFF000000),
+                    //   border: Border.all(color: Colors.black26, width: 2),
+                    // ),
+                    child: InteractiveViewer(
+                      maxScale: 10,
+                      minScale: 0.1,
+                      //boundaryMargin: const EdgeInsets.all(double.infinity),
+                      //clipBehavior: Clip.none,
+                      //constrained: true,
+                      child: Image.memory(
+                        base64Decode(side!),
+                        //fit: BoxFit.cover,//BoxFit.fitHeight,
+                      ),
+                    ),
+                  ),
+                ),
+                Align(
+                    alignment: Alignment.topLeft,
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Container(
+
+                          child: Icon(Icons.pinch, color: Color(0xCCffffff),)
+                      ),
+                    )
+                )
+              ]
+          ),
+        )
+
     );
   }
+
+  // Widget cardSide(String? side){
+  //   return Padding(
+  //     padding: const EdgeInsets.all(16.0),
+  //     child: Container(
+  //       clipBehavior: Clip.hardEdge,
+  //       decoration: BoxDecoration(
+  //         borderRadius: BorderRadius.circular(15),
+  //         color: const Color(0xFF000000),
+  //         border: Border.all(color: Colors.black26, width: 2),
+  //       ),
+  //       child: Center(
+  //           child: InteractiveViewer(
+  //             maxScale: 10,
+  //             clipBehavior: Clip.none,
+  //             child: Image.memory(
+  //               base64Decode(side!),
+  //               fit: BoxFit.fitWidth,
+  //             ),
+  //           )
+  //       ),
+  //     ),
+  //   );
+  // }
 
 
 
@@ -203,29 +252,32 @@ class _LearnState extends State<Learn> {
         ),
       ),
       body: (isCardsDue) ?
-      SingleChildScrollView(
-        child: Center(
+      Center(
+        child: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             mainAxisAlignment: MainAxisAlignment.start,
-            mainAxisSize: MainAxisSize.max,
+            mainAxisSize: MainAxisSize.min,
             children: [
-              Padding(
-                padding: const EdgeInsets.all(16.0),
+              Flexible(
+                fit: FlexFit.loose,
                 child: Center(
                   child: (isImage)?
                       cardSide((reveal)?currentCard?.back:currentCard?.front)
                     :
 
-                    Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(15),
-                        color: Colors.white,
-                        border: Border.all(color: Colors.black26, width: 2),
+                    Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(15),
+                          color: Colors.white,
+                          border: Border.all(color: Colors.black26, width: 2),
+                        ),
+                        child: (_controllerFront == null) ?
+                        const Center(child: CircularProgressIndicator(),)
+                            : ZefyrEditor(controller: _controllerFront!, readOnly: true, padding: const EdgeInsets.all(16), showCursor: false,),
                       ),
-                      child: (_controllerFront == null) ?
-                      const Center(child: CircularProgressIndicator(),)
-                          : ZefyrEditor(controller: _controllerFront!, readOnly: true, padding: const EdgeInsets.all(16), showCursor: false,),
                     ),
                 ),
               ),
@@ -255,11 +307,14 @@ class _LearnState extends State<Learn> {
                         setState(() {
                           isLoading = true;
                         });
-                        _loadDocument(currentCard!.back).then((document) {
-                          setState(() {
-                            _controllerBack = ZefyrController(document);
+                        if(!isImage){
+                          _loadDocument(currentCard!.back).then((document) {
+                            setState(() {
+                              _controllerBack = ZefyrController(document);
+                            });
                           });
-                        });
+                        }
+
                         setState(() => isLoading = false);
                       }
                     },
@@ -337,7 +392,7 @@ class _LearnState extends State<Learn> {
                     //   //print("Updated eFactor: ${currentCard.getUpdatedEFactor(_diffFactor)}");
                     // }
                     currentCard!.eFactor = currentCard!.getUpdatedEFactor(_diffFactor);
-                    print("\neFactor:${currentCard!.eFactor} repetitions: ${currentCard!.repetitions}");
+                    //print("\neFactor:${currentCard!.eFactor} repetitions: ${currentCard!.repetitions}");
 
 
                     Data.instance.updateFlashcard(currentCard!);

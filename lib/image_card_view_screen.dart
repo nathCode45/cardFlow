@@ -23,24 +23,49 @@ class _ImageCardViewScreenState extends State<ImageCardViewScreen> {
   Widget cardSide(String side){
     return Padding(
       padding: const EdgeInsets.all(16.0),
-      child: Container(
-        clipBehavior: Clip.hardEdge,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(15),
-          color: const Color(0xFF000000),
-          border: Border.all(color: Colors.black26, width: 2),
-        ),
-        child: Center(
-            child: InteractiveViewer(
-              maxScale: 10,
-              clipBehavior: Clip.none,
-              child: Image.memory(
+      child:
+      ClipRRect(
+        borderRadius: BorderRadius.circular(15),
+        child:
+        Stack(
+          children: [
+            Center(
+              child: Container(
+              width: double.infinity,
+              height: double.infinity,
+              color: const Color(0xFF000000),
+                // decoration: BoxDecoration(
+                //   borderRadius: BorderRadius.circular(15),
+                //   color: const Color(0xFF000000),
+                //   border: Border.all(color: Colors.black26, width: 2),
+                // ),
+              child: InteractiveViewer(
+                maxScale: 10,
+                minScale: 0.1,
+                //boundaryMargin: const EdgeInsets.all(double.infinity),
+                //clipBehavior: Clip.none,
+                //constrained: true,
+                child: Image.memory(
                   base64Decode(side),
-                  fit: BoxFit.fitWidth,
+                  //fit: BoxFit.cover,//BoxFit.fitHeight,
+                ),
               ),
-            )
+          ),
+            ),
+          Align(
+              alignment: Alignment.topLeft,
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Container(
+
+                    child: Icon(Icons.pinch, color: Color(0xCCffffff),)
+                ),
+              )
+          )
+          ]
         ),
-      ),
+      )
+
     );
   }
 
