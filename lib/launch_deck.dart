@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:camera/camera.dart';
 import 'package:card_flow/card_edit_screen.dart';
+import 'package:card_flow/home_screen.dart';
 import 'package:card_flow/image_card_view_screen.dart';
 import 'package:card_flow/image_to_fcard.dart';
 import 'package:flutter/cupertino.dart';
@@ -44,6 +45,47 @@ class _LaunchDeckState extends State<LaunchDeck> {
   }
 
 
+  Future<void> _showDeleteDialog() async{
+    return showDialog<void>(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context){
+          return AlertDialog(
+            title: Text("Are you sure you want to delete this deck?", style: GoogleFonts.openSans(),),
+            content: SingleChildScrollView(
+                child: Text("This action cannot be undone.", style: GoogleFonts.openSans(),)
+            ),
+            actions: [
+              TextButton(
+                  autofocus: true,
+                  onPressed: (){
+                    Navigator.of(context).pop();
+                  }, child:  Text("NO", style:GoogleFonts.openSans(fontWeight: FontWeight.bold))),
+              TextButton(onPressed: () async{
+
+                List<Flashcard> cards = await args.getCards();
+                for(int i = 0; i<cards.length; i++){
+                  Data.instance.deleteFlashcard(cards[i].id!);
+                }
+
+                Data.instance.deleteDeck(args.id!);
+
+                if(mounted){
+                  ScaffoldMessenger.of(context)
+                      .showSnackBar(SnackBar(content: Text('Deleted ${args.name}')));
+
+                  Navigator.popUntil(context, ModalRoute.withName('/'));
+                }
+              }, child: const Text("YES")),
+
+
+            ],
+          );
+        }
+    );
+  }
+
+
 
 
 
@@ -69,6 +111,12 @@ class _LaunchDeckState extends State<LaunchDeck> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
+        actions: [
+          IconButton(icon: const Icon(Icons.delete), onPressed:() async{
+            _showDeleteDialog();
+          }
+          )
+        ],
         title: Text(
           args.name,
           style: GoogleFonts.openSans(),

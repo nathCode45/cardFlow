@@ -80,22 +80,85 @@ class _ImageCardScreenState extends State<ImageCardScreen> {
           builder: (context, snapshot) {
             double sizeBy = (portrait)? MediaQuery.of(context).size.width: MediaQuery.of(context).size.height;
             if (snapshot.connectionState == ConnectionState.done) {
-              return Container(
-                width: (portrait)?sizeBy:sizeBy+200,
-                height: (portrait)?sizeBy+200:sizeBy,
-                child: ClipRect(
-                  child: OverflowBox(
-                    alignment: Alignment.center,
-                    child: FittedBox(
+              return Stack(
+                alignment: Alignment.bottomCenter,
+                children: [FittedBox(
                       fit: (portrait)?BoxFit.fitWidth: BoxFit.fitHeight,
                       child: Container(
-                          width: sizeBy,
-                          child: CameraPreview(_controller)
-                      ),
+                      width: sizeBy,
+                      child: CameraPreview(_controller)
+                      )),
+                  Container(
+                    color: Color(0xCC000000),
+                    width: double.infinity,
+                    height: 150,
+                    child:
+                    Center(
+                      child: ElevatedButton(
+                            onPressed: () async {
+                              try {
+                                await _initializeControllerFuture;
+                                _controller;
+
+                                final image = await _controller.takePicture();
+
+                                CroppedFile? croppedFile = await ImageCropper().cropImage(
+                                  sourcePath: image.path,
+                                  aspectRatioPresets: [
+                                    CropAspectRatioPreset.square,
+                                    CropAspectRatioPreset.ratio3x2,
+                                    CropAspectRatioPreset.original,
+                                    CropAspectRatioPreset.ratio4x3,
+                                    CropAspectRatioPreset.ratio16x9
+                                  ],
+                                  uiSettings: [
+                                    AndroidUiSettings(
+                                        toolbarTitle: 'Crop your image',
+                                        toolbarColor: Colors.deepOrange,
+                                        toolbarWidgetColor: Colors.white,
+                                        initAspectRatio: CropAspectRatioPreset.original,
+                                        lockAspectRatio: false),
+                                    IOSUiSettings(
+                                      title: 'Crop your image',
+                                    ),
+                                  ],
+                                );
+                                String path = "";
+
+                                if(croppedFile!=null){
+                                  path = croppedFile.path;
+                                }else{
+                                  path = image.path;
+                                }
+
+
+                                if (!mounted) return;
+                                await Navigator.of(context).pushReplacement(MaterialPageRoute(
+                                    builder: (context) => DispAndMaskScreen(
+                                      baseImagePath: path,
+                                      deck: widget.deck,
+                                    )));
+                              } catch (e) {
+                                print(e);
+                              }
+                            },
+                            style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.white,
+                                shape: const CircleBorder()
+                            ),
+                            child: const Padding(
+                              padding: EdgeInsets.all(24.0),
+                              child: Icon(
+                                size: 32,
+                                Icons.camera_alt,
+                                color: Colors.black,
+                              ),
+                            ),
+                          ),
                     ),
-                  ),
-                ),
-              );
+                      ),
+                    ]);
+
             } else {
               return const Center(
                 child: CircularProgressIndicator(),
@@ -103,152 +166,11 @@ class _ImageCardScreenState extends State<ImageCardScreen> {
             }
           },
         ),
-        Expanded(
-            child: Center(
-              child: ElevatedButton(
-                onPressed: () async {
-                  try {
-                    await _initializeControllerFuture;
-                    _controller;
 
-                    final image = await _controller.takePicture();
-
-                    CroppedFile? croppedFile = await ImageCropper().cropImage(
-                      sourcePath: image.path,
-                      aspectRatioPresets: [
-                        CropAspectRatioPreset.square,
-                        CropAspectRatioPreset.ratio3x2,
-                        CropAspectRatioPreset.original,
-                        CropAspectRatioPreset.ratio4x3,
-                        CropAspectRatioPreset.ratio16x9
-                      ],
-                      uiSettings: [
-                        AndroidUiSettings(
-                            toolbarTitle: 'Cropper',
-                            toolbarColor: Colors.deepOrange,
-                            toolbarWidgetColor: Colors.white,
-                            initAspectRatio: CropAspectRatioPreset.original,
-                            lockAspectRatio: false),
-                        IOSUiSettings(
-                          title: 'Cropper',
-                        ),
-                        WebUiSettings(
-                          context: context,
-                        ),
-                      ],
-                    );
-                    String path = "";
-
-                    if(croppedFile!=null){
-                      path = croppedFile.path;
-                    }else{
-                      path = image.path;
-                    }
-
-
-                    if (!mounted) return;
-                    await Navigator.of(context).pushReplacement(MaterialPageRoute(
-                        builder: (context) => DispAndMaskScreen(
-                          baseImagePath: path,
-                          deck: widget.deck,
-                        )));
-                  } catch (e) {
-                    print(e);
-                  }
-                },
-                style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    shape: const CircleBorder()
-                ),
-                child: const Padding(
-                  padding: EdgeInsets.all(16.0),
-                  child: Icon(
-                    size: 32 ,
-                    Icons.camera_alt,
-                    color: Colors.black,
-                  ),
-                ),
-              ),
-            )
-        )
       ];
     }
 
-    // String imagePathFinal = "";
-    // MediaCapture? currentCapture;
-    // bool done = false;
 
-
-
-
-    // return CameraAwesomeBuilder.awesome(
-    //   exifPreferences: ExifPreferences(saveGPSLocation: false),
-    //   progressIndicator: const Center(child: CircularProgressIndicator()),
-    //   onImageForAnalysis: (image) async{
-    //     if(done){
-    //         if (!mounted) return;
-    //         await Navigator.of(context).pushReplacement(MaterialPageRoute(
-    //             builder: (context) => DispAndMaskScreen(
-    //               baseImagePath: imagePathFinal,
-    //               deck: widget.deck,
-    //             )));
-    //         done = false;
-    //
-    //     }
-    //
-    //
-    //
-    //   },
-    //     saveConfig: SaveConfig.photo(
-    //         pathBuilder: () async{
-    //   Directory d = await getApplicationDocumentsDirectory();
-    //   String path = d.path;
-    //
-    //   imagePathFinal = '$path/image.jpg';
-    //
-    //   done = true;
-    //   print("called");
-    //
-    //
-    //   return imagePathFinal;
-    //
-    // },
-    // ),
-    // );
-
-    // return CameraAwesomeBuilder.custom(
-    //   builder: (cameraState, previewSize, previewRect){
-    //     return cameraState.when(
-    //       on
-    //     );
-    //   }, saveConfig: SaveConfig.photo(
-    //         pathBuilder: () async{
-    //           Directory d = await getApplicationDocumentsDirectory();
-    //           String path = d.path;
-    //
-    //           return '$path/image.jpg';
-    //
-    //         },
-    //       ),
-    // );
-
-    // return OrientationBuilder(
-    //     builder: (BuildContext context, Orientation orientation) {
-    //       return
-    //       Scaffold(
-    //         backgroundColor: Colors.black12,
-    //         appBar: (orientation==Orientation.portrait)?AppBar(backgroundColor: Colors.black12,):null,
-    //         body: (orientation==Orientation.portrait)?
-    //         SafeArea(
-    //           child: Column(
-    //             children: _camChildren(true)
-    //           ),
-    //         ):SafeArea(child: Row(
-    //             children: _camChildren(false)
-    //         )),
-    //       );
-    //     },
-    // );
 
     return OrientationBuilder(
       builder: (BuildContext context, Orientation orientation) {

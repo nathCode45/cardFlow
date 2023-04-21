@@ -44,6 +44,36 @@ class _ImageCardViewScreenState extends State<ImageCardViewScreen> {
     );
   }
 
+  Future<void> _showDeleteDialog() async{
+    return showDialog<void>(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context){
+          return AlertDialog(
+            title: const Text("Are you sure you want to delete this card?"),
+            content: const SingleChildScrollView(
+                child: Text("This action cannot be undone.")
+            ),
+            actions: [
+              TextButton(
+                  autofocus: true,
+                  onPressed: (){
+                    Navigator.of(context).pop();
+                  }, child: const Text("NO", style: TextStyle(fontWeight: FontWeight.bold),)),
+              TextButton(onPressed: (){
+                Data.instance.deleteFlashcard(flashcard.id!);
+                ScaffoldMessenger.of(context)
+                    .showSnackBar(SnackBar(content: Text('Deleted card')));
+                Navigator.popUntil(context, ModalRoute.withName(LaunchDeck.routeName));
+              }, child: const Text("YES")),
+
+
+            ],
+          );
+        }
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     flashcard = ModalRoute.of(context)!.settings.arguments as Flashcard;
@@ -60,12 +90,7 @@ class _ImageCardViewScreenState extends State<ImageCardViewScreen> {
                     Colors.white)
             ),
             onPressed: (){
-              print("pressed");
-              String name = "Image";
-              Data.instance.deleteFlashcard(flashcard.id!);
-              ScaffoldMessenger.of(context)
-                  .showSnackBar(SnackBar(content: Text('Deleted $name', style: GoogleFonts.openSans(),)));
-              Navigator.popUntil(context, ModalRoute.withName(LaunchDeck.routeName));
+              _showDeleteDialog();
             },
             child: Row(
               mainAxisSize: MainAxisSize.max,

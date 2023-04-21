@@ -43,6 +43,7 @@ class _DispAndMaskState extends State<DispAndMaskScreen> {
   }
 
   void saveImage() async{
+
     final image = await _imageKey.currentState?.exportImage();
     final directory = (await getApplicationDocumentsDirectory()).path;
     await Directory('$directory/sample').create(recursive: true);
@@ -56,8 +57,10 @@ class _DispAndMaskState extends State<DispAndMaskScreen> {
     print('back: $baseImage');
     await Data.instance.createFlashcard(Flashcard(finalImage,baseImage, isImage: true, deckID: widget.deck.id));
 
-    ScaffoldMessenger.of(context)
-        .showSnackBar(SnackBar(content: Text('Saved.', style: GoogleFonts.openSans(),)));
+    if(context.mounted){
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Saved.', style: GoogleFonts.openSans(),)));
+    }
 
 
   }
@@ -127,7 +130,7 @@ class _DispAndMaskState extends State<DispAndMaskScreen> {
       appBar: AppBar(
         leading: Padding(
           padding: const EdgeInsets.fromLTRB(4,0,0,0),
-          child: TextButton(child: Text("Done", style: GoogleFonts.openSans(color: Colors.white),),
+          child: TextButton(child: Text("Done", style: Theme.of(context).textTheme.bodySmall),// GoogleFonts.openSans(color: Colors.white),),
             onPressed: ()=>Navigator.pushNamedAndRemoveUntil(context, LaunchDeck.routeName, ModalRoute.withName('/'), arguments: widget.deck)),
         ),
           // onPressed: (){

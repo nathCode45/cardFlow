@@ -5,6 +5,7 @@ import 'dart:math';
 
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'package:zefyrka/zefyrka.dart';
@@ -236,6 +237,17 @@ class Data{
 
   Data._init();
 
+  String _shorten(String str){
+    const int CHARACTER_LIMIT = 20;
+    String singleLine = str.replaceAll("\n", " ");
+    if (singleLine.length>CHARACTER_LIMIT){
+      return '${singleLine.substring(0, CHARACTER_LIMIT)}...';
+    }else{
+      return singleLine;
+    }
+
+  }
+
   Future<Database> get database async {
     if (_database!=null){
       return _database!;
@@ -254,6 +266,9 @@ class Data{
     return await openDatabase(path, version: 1, onCreate: _createDB);
 
   }
+
+
+
 
   Future _createDB(Database db, int version) async {
     db.execute('CREATE TABLE decks(id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, date_created TEXT)');
