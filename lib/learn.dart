@@ -68,6 +68,9 @@ class _LearnState extends State<Learn> {
           }
         }
       }
+      if(cards[nearest].isImage){
+        await Future.delayed(const Duration(milliseconds: 100));
+      }
       return cards[nearest];
     }else{
       return null;
@@ -252,7 +255,7 @@ class _LearnState extends State<Learn> {
         ),
       ),
       body: (isCardsDue) ?
-      Center(
+      (!isLoading)?Center(
         child: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -411,7 +414,7 @@ class _LearnState extends State<Learn> {
             ],
           ),
         ),
-      ):
+      ):const Center(child: CircularProgressIndicator()):
       Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
