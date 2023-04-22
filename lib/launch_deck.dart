@@ -251,7 +251,7 @@ class _LaunchDeckState extends State<LaunchDeck> {
   }
 
   String _shorten(String str){
-    const int CHARACTER_LIMIT = 20;
+    const int CHARACTER_LIMIT = 30;
     String singleLine = str.replaceAll("\n", " ");
     if (singleLine.length>CHARACTER_LIMIT){
       return '${singleLine.substring(0, CHARACTER_LIMIT)}...';

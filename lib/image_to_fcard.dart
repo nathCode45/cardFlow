@@ -102,6 +102,7 @@ class _ImageCardScreenState extends State<ImageCardScreen> {
 
                                 final image = await _controller.takePicture();
 
+
                                 CroppedFile? croppedFile = await ImageCropper().cropImage(
                                   sourcePath: image.path,
                                   aspectRatioPresets: [

@@ -81,6 +81,10 @@ flutter:
     - assets/cflow_logo.png
     - assets/deck_icon.png
     - assets/card_icon.png
+    - assets/EBB_clear.png
+    - assets/EBB_title_mask.png
+    - assets/EBB_y_mask.png
+    - assets/EBB_x_mask.png
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
 

@@ -71,12 +71,14 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     dSubration= dSubration + 7*weeksBack; //account for weeks back
     sunday = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day - dSubration);
 
-
-    List<ProgressRep> weeklyProgressReps = await Data.instance.readProgress(sunday, sunday.add(const Duration(days: 6)));
+    print('SUNDAY: $sunday');
+    List<ProgressRep> weeklyProgressReps = await Data.instance.readProgress(sunday, sunday.add(const Duration(days: 6, hours: 24, minutes: 59, seconds: 59)));
+    print('PROGRESS REPS: $weeklyProgressReps');
 
     numProgressPastWeek=[0,0,0,0,0,0,0]; //position 0 is sunday, position 6 is saturday
     for(ProgressRep rep in weeklyProgressReps){
       //datetime weekdays mondays are 1 and sundays are 7
+      print("PROGRESS REP: weekday: ${rep.dateTime.weekday}, time: ${rep.dateTime}");
       if(rep.dateTime.weekday==DateTime.sunday){
         numProgressPastWeek[0]++;
       }else{

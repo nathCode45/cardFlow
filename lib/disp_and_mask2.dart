@@ -50,13 +50,17 @@ class _DispAndMaskState extends State<DispAndMaskScreen> {
     }
 
     final image = await _imageKey.currentState?.exportImage();
-    final directory = (await getApplicationDocumentsDirectory()).path;
-    await Directory('$directory/sample').create(recursive: true);
-    final fullPath =
-        '$directory/sample/${DateTime.now().millisecondsSinceEpoch}.png';
-    final imgFile = File('$fullPath');
-    imgFile.writeAsBytesSync(image!);
-    String finalImage = base64Encode(imgFile.readAsBytesSync());
+    List<int>? imageConvert = image?.toList();
+
+    // final directory = (await getApplicationDocumentsDirectory()).path;
+    // await Directory('$directory/sample').create(recursive: true);
+    // final fullPath =
+    //     '$directory/sample/${DateTime.now().millisecondsSinceEpoch}.png';
+    // final imgFile = File('$fullPath');
+    // imgFile.writeAsBytesSync(image!);
+    //String finalImage = base64Encode(imgFile.readAsBytesSync());
+
+    String finalImage = base64Encode(imageConvert!);
     String baseImage = base64Encode(File(widget.baseImagePath).readAsBytesSync());
     await Data.instance.createFlashcard(Flashcard(finalImage,baseImage, isImage: true, deckID: widget.deck.id));
 

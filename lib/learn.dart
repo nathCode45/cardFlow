@@ -262,12 +262,12 @@ class _LearnState extends State<Learn> {
               Flexible(
                 fit: FlexFit.loose,
                 child: Center(
-                  child: (isImage)?
+                  child: (isImage && !isLoading)?
                       cardSide((reveal)?currentCard?.back:currentCard?.front)
                     :
 
                     Padding(
-                      padding: const EdgeInsets.all(16),
+                      padding: const EdgeInsets.fromLTRB(16,32,16,16),
                       child: Container(
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(15),

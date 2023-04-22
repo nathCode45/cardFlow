@@ -289,7 +289,7 @@ class _CardEditState extends State<CardEdit> {
     }else{
       args.card.front = contents;
       args.card.back = contents2;
-      //print("$contents/n$contents2");
+      print("$contents\n$contents2");
       args.card.deckID = args.selectedDeckID;
       await Data.instance.updateFlashcard(args.card);
       print(args.card);
