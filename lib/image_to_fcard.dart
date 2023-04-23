@@ -1,15 +1,10 @@
-import 'dart:convert';
 
-import 'dart:io' as Io;
-import 'dart:io';
+
+
 import 'package:camera/camera.dart';
-import 'package:camerawesome/camerawesome_plugin.dart';
-import 'package:camerawesome/pigeon.dart';
 import 'package:card_flow/disp_and_mask2.dart';
-import 'package:path/path.dart' as path;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:image_cropper/image_cropper.dart';
 
 
@@ -71,7 +66,7 @@ class _ImageCardScreenState extends State<ImageCardScreen> {
         (portrait)?const SizedBox(height: 0,):
         Column(
           mainAxisAlignment: MainAxisAlignment.start,
-            children: [SizedBox(height: 8,),IconButton(onPressed: ()=>Navigator.of(context).pop(), icon: Icon(Icons.arrow_back_ios_new, color: Colors.white,))]
+            children: [const SizedBox(height: 8,),IconButton(onPressed: ()=>Navigator.of(context).pop(), icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white,))]
         ),
 
         FutureBuilder<void>(
@@ -88,7 +83,7 @@ class _ImageCardScreenState extends State<ImageCardScreen> {
                       child: CameraPreview(_controller)
                       )),
                   Container(
-                    color: Color(0xCC000000),
+                    color: const Color(0xCC000000),
                     width: double.infinity,
                     height: 150,
                     child:
@@ -140,7 +135,7 @@ class _ImageCardScreenState extends State<ImageCardScreen> {
                                 }
 
                               } catch (e) {
-                                print(e);
+                                //print(e);
                               }
                             },
                             style: ElevatedButton.styleFrom(

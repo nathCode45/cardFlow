@@ -4,7 +4,6 @@ import 'package:card_flow/deck_data.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:zefyrka/zefyrka.dart';
 
 import 'launch_deck.dart';
 
@@ -57,8 +56,7 @@ class _ImageCardViewScreenState extends State<ImageCardViewScreen> {
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Container(
-
-                    child: Icon(Icons.pinch, color: Color(0xCCffffff),)
+                    child: const Icon(Icons.pinch, color: Color(0xCCffffff),)
                 ),
               )
           )
@@ -88,7 +86,7 @@ class _ImageCardViewScreenState extends State<ImageCardViewScreen> {
               TextButton(onPressed: (){
                 Data.instance.deleteFlashcard(flashcard.id!);
                 ScaffoldMessenger.of(context)
-                    .showSnackBar(SnackBar(content: Text('Deleted card')));
+                    .showSnackBar(const SnackBar(content: Text('Deleted card')));
                 Navigator.popUntil(context, ModalRoute.withName(LaunchDeck.routeName));
               }, child: const Text("YES")),
 
@@ -106,7 +104,7 @@ class _ImageCardViewScreenState extends State<ImageCardViewScreen> {
     return Scaffold(
       appBar: AppBar(actions: [
         Padding(
-          padding: EdgeInsets.all(8),
+          padding: const EdgeInsets.all(8),
           child: ElevatedButton(
             style: ButtonStyle(
                 backgroundColor: MaterialStateProperty.all<Color>(

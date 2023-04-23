@@ -1,11 +1,9 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:math';
 
 
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
+
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'package:zefyrka/zefyrka.dart';
@@ -16,6 +14,7 @@ class Deck{
   int? id;
   String name;
   DateTime? dateCreated;
+  static const Duration RECENCY_BUFFER = Duration(minutes: 2);
 
 
 
@@ -44,13 +43,17 @@ class Deck{
 
   Future<List<int>> getCardsDueIDs({Duration? skipBuffer}) async{
 
+
+
     List<Flashcard> cards = await getCards();
     List<int> dueListIDs = []; //list of ids instead of entire cards, in order to save space
 
     DateTime compareToTime = (skipBuffer!=null)? DateTime.now().add(skipBuffer): DateTime.now();
 
     for(int i = 0; i<cards.length; i++){
-      if(cards[i].nextReview.compareTo(compareToTime) < 0){
+      if(cards[i].repetitions>1 && cards[i].repetitions<3 && cards[i].nextReview.compareTo(compareToTime.add(RECENCY_BUFFER)) < 0){//add 2 minutes to the compare to time to make it easier to become due
+        dueListIDs.add(cards[i].id!);
+      }else if(cards[i].nextReview.compareTo(compareToTime) < 0){
         dueListIDs.add(cards[i].id!);
       }
     }
@@ -71,7 +74,7 @@ class Flashcard{
   int repetitions;
   DateTime nextReview;
 
-  static const double INITIAL_EFACTOR = 4.2;//2.5;
+  static const double INITIAL_EFACTOR = 2.5;//2.5;
 
   Flashcard(this.front, this.back, {this.id, this.deckID, this.isImage=false}):
     nextReview = DateTime.now(),
@@ -237,16 +240,7 @@ class Data{
 
   Data._init();
 
-  String _shorten(String str){
-    const int CHARACTER_LIMIT = 20;
-    String singleLine = str.replaceAll("\n", " ");
-    if (singleLine.length>CHARACTER_LIMIT){
-      return '${singleLine.substring(0, CHARACTER_LIMIT)}...';
-    }else{
-      return singleLine;
-    }
 
-  }
 
   Future<Database> get database async {
     if (_database!=null){
@@ -299,8 +293,8 @@ class Data{
   Future<List<Deck>> readDecks() async {
     final db = await instance.database;
     final List<Map<String, dynamic>> maps = await db.query('decks', columns: ['id', 'name']);
-    print("maps");
-    print(maps);
+    //print("maps");
+    //print(maps);
 
     if(maps.isNotEmpty){
       return List.generate(

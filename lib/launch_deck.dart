@@ -2,13 +2,11 @@ import 'dart:convert';
 
 import 'package:camera/camera.dart';
 import 'package:card_flow/card_edit_screen.dart';
-import 'package:card_flow/home_screen.dart';
 import 'package:card_flow/image_card_view_screen.dart';
 import 'package:card_flow/image_to_fcard.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:sqflite/sqflite.dart';
 import 'package:zefyrka/zefyrka.dart';
 import 'deck_data.dart';
 import 'learn.dart';
@@ -130,9 +128,9 @@ class _LaunchDeckState extends State<LaunchDeck> {
             onPressed: () async{
               if(!mounted) return;
               final value = await Navigator.pushNamed(context, CardEdit.routeName, arguments: CardEditScreenArguments(selectedDeckID: args.id!));
-              setState(() {refreshCards(); print("called btn1");});
+              setState(() {refreshCards();});
             },
-            child: Icon(Icons.add),
+            child: const Icon(Icons.add),
         ),
           const SizedBox(height: 8),
 
@@ -144,9 +142,9 @@ class _LaunchDeckState extends State<LaunchDeck> {
               final firstCamera = cameras.first;
               if(!mounted) return;
               final value = await Navigator.push(context, MaterialPageRoute(builder: (context)=>ImageCardScreen(camera: firstCamera, deck: args)));
-              setState(() {refreshCards(); print("called btn2");});
+              setState(() {refreshCards();});
             },
-            child: Icon(Icons.camera_alt),
+            child: const Icon(Icons.camera_alt),
           )
         ]
       ),

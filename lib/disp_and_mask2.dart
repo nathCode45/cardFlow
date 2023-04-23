@@ -10,7 +10,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:image_painter/image_painter.dart';
 //import 'package:card_flow/flutter_image_painter_fork/lib/image_painter.dart'; //TODO this package should be deleted entirely from your project eventually because it gets it from github instead
 
-import 'package:path_provider/path_provider.dart';
+
 
 
 import 'deck_data.dart';
@@ -126,7 +126,7 @@ class _DispAndMaskState extends State<DispAndMaskScreen> {
         initialPaintMode: PaintMode.freeStyle,
         initialStrokeWidth: 60,
         initialColor: Colors.blueAccent,
-        onEdit: (){isNewEdits = true; print("NEW EDIT $isNewEdits");},
+        onEdit: (){isNewEdits = true;},
         clearedID: 0
     );
     return Scaffold(
@@ -178,7 +178,8 @@ class _DispAndMaskState extends State<DispAndMaskScreen> {
                     label: Text("Create New Card", style: GoogleFonts.openSans(),))
                 )
             ),
-          )
+          ),
+          SizedBox(height: 25,)
         ],
       ),
     );

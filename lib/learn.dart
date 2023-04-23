@@ -42,10 +42,21 @@ class _LearnState extends State<Learn> {
     return nearest;
   }
 
+  String _shorten(String str){
+    const int CHARACTER_LIMIT = 30;
+    String singleLine = str.replaceAll("\n", " ");
+    if (singleLine.length>CHARACTER_LIMIT){
+      return '${singleLine.substring(0, CHARACTER_LIMIT)}...';
+    }else{
+      return singleLine;
+    }
+
+  }
+
 
 
   Future<Flashcard?> getLearnCard() async {
-    int nearest = 0;
+
 
     //List<int> dueListIDs = []; //list of ids instead of entire cards, in order to save space
 
@@ -57,17 +68,47 @@ class _LearnState extends State<Learn> {
     // }
 
     List<int> dueListIDs = await widget.deck.getCardsDueIDs(skipBuffer: skipBuffer);
-    skipBuffer = Duration.zero;
+    int nearest = 0;
+
 
     if(dueListIDs.isNotEmpty) {
       for (int i = 0; i < dueListIDs.length; i++) {
         for (int j = 0; j < cards.length; j++) {
-          if (cards[j].id == dueListIDs[i] &&
-              cards[j].nextReview.compareTo(cards[nearest].nextReview) < 0) {
-            nearest = j;
+          if (cards[j].id == dueListIDs[i]){ //if on the due list
+            //print("j: ${_shorten(cards[j].front)} repetitions: ${cards[j].repetitions} nextReview: ${cards[j].nextReview}");
+            //print('nearest: ${_shorten(cards[nearest].front)} repetitions: ${cards[nearest].repetitions} nextReview: ${cards[nearest].nextReview}');
+
+            if(!dueListIDs.contains(cards[nearest].id)  && !cards[nearest].nextReview.isBefore(DateTime.now().add(skipBuffer).add(const Duration(minutes: 1)))){ //if the nearest is not even due within a minute
+              nearest = j; //because j is due
+              //print("Nearest is not due!");
+            } else if(cards[nearest].repetitions==1){ //if the nearest card so far has not been reviewed at all
+              if(cards[j].repetitions>1){ // if cards j has been reviewed
+                nearest = j;
+                //print("Nearest has no repetitions but this one has some!");
+              }else if(cards[j].nextReview.isBefore(cards[nearest].nextReview)){ //cards j has no repititons and neither does the nearest card but cards j is nearer than current nearest
+                nearest = j;
+                //print("Neither this card nor the nearest has repetitions but this one comes sooner!");
+              }
+            }else if(cards[j].repetitions>1){
+              if(cards[j].nextReview.difference(DateTime.now().add(skipBuffer)).abs()< cards[nearest].nextReview.difference(DateTime.now().add(skipBuffer)).abs()){
+                nearest = j;
+                //print("The nearest is due, has been reviewed, but this one has also been reviewed and comes closer to now +buffer!");
+              }
+            }else{
+              if(cards[j].nextReview.difference(DateTime.now().add(skipBuffer).add(Deck.RECENCY_BUFFER)).abs()< cards[nearest].nextReview.difference(DateTime.now().add(skipBuffer)).abs()){
+                nearest = j;
+                //print("The nearest is due, has been reviewed, but this one has not been reviewed and comes closer to now + buffer + 1 minute!");
+              }
+            }
           }
         }
       }
+
+      skipBuffer = Duration.zero;
+
+
+
+
       if(cards[nearest].isImage){
         await Future.delayed(const Duration(milliseconds: 100));
       }
@@ -141,7 +182,7 @@ class _LearnState extends State<Learn> {
   }
 
   void startTimer(){
-    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if(_getWhenNext().difference(DateTime.now()).inSeconds<=0){
         timer.cancel();
         Timer(const Duration(milliseconds: 100), (){});//wait a small amount of time so that transition is smoother
@@ -194,7 +235,7 @@ class _LearnState extends State<Learn> {
                       padding: const EdgeInsets.all(8.0),
                       child: Container(
 
-                          child: Icon(Icons.pinch, color: Color(0xCCffffff),)
+                          child: const Icon(Icons.pinch, color: Color(0xCCffffff),)
                       ),
                     )
                 )
@@ -325,7 +366,7 @@ class _LearnState extends State<Learn> {
                       shape: MaterialStateProperty.all<RoundedRectangleBorder>(
                         RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
-                          side: BorderSide(color: Colors.black12, width: 2.0)
+                          side: const BorderSide(color: Colors.black12, width: 2.0)
                         )
                       )
                     ),
@@ -408,9 +449,9 @@ class _LearnState extends State<Learn> {
                     refreshCards();
                   });
 
-                }), child: Icon(Icons.arrow_forward_ios_sharp)),
+                }), child: const Icon(Icons.arrow_forward_ios_sharp)),
               ):Container(),
-              SizedBox(height: 100,)
+              const SizedBox(height: 100,)
             ],
           ),
         ),
@@ -420,13 +461,13 @@ class _LearnState extends State<Learn> {
             mainAxisAlignment: MainAxisAlignment.center,
 
               children: [
-                (isLoading)? CircularProgressIndicator():Text("Next card due in: ${
+                (isLoading)? const CircularProgressIndicator():Text("Next card due in: ${
                     SliderWidget.formattedTime(_getWhenNext().difference(DateTime.now()), seconds: true) //uses formatted time from slider widget
                 }"),
                 TextButton(onPressed: refreshCards, child: Text("Refresh", style: GoogleFonts.openSans(),)),
                 Center(
                   child: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 20, vertical: 0),
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 0),
                     child: Text("Waiting betweeen repetitions enhances memory training, but if you're in a rush you can skip to the next review", textAlign: TextAlign.center, style: GoogleFonts.openSans(),),
                   ),
                 ),
@@ -435,7 +476,7 @@ class _LearnState extends State<Learn> {
                   setState(() {
                     refreshCards();
                   });
-                }, icon: Icon(Icons.skip_next), label: Text("Skip", style: GoogleFonts.openSans(),),),
+                }, icon: const Icon(Icons.skip_next), label: Text("Skip", style: GoogleFonts.openSans(),),),
 
               ]
           )

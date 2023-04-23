@@ -209,7 +209,7 @@ class _CardEditState extends State<CardEdit> {
                       ),
                   ))),
                 ),
-                SizedBox(height: 50,),
+                const SizedBox(height: 50,),
                 Text("Back", style: GoogleFonts.openSans(
                     fontSize: 20.0,)),
                 Padding(
@@ -278,8 +278,8 @@ class _CardEditState extends State<CardEdit> {
   }
 
   void _saveDocument(BuildContext context, bool isExistingCard) async {
-    print(_controller!.document);
-    print(_controller2!.document);
+    //print(_controller!.document);
+    //print(_controller2!.document);
     final contents = jsonEncode(_controller!.document);
     final contents2 = jsonEncode(_controller2!.document);
 
@@ -289,14 +289,18 @@ class _CardEditState extends State<CardEdit> {
     }else{
       args.card.front = contents;
       args.card.back = contents2;
-      print("$contents\n$contents2");
+      //print("$contents\n$contents2");
       args.card.deckID = args.selectedDeckID;
       await Data.instance.updateFlashcard(args.card);
-      print(args.card);
+      //print(args.card);
     }
 
-    ScaffoldMessenger.of(context)
-        .showSnackBar(SnackBar(content: Text('Saved.', style: GoogleFonts.openSans(),)));
+    if(mounted){
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Saved.', style: GoogleFonts.openSans(),)));
+    }
+
+
 
     ///reset controllers to be empty
     setState(() {

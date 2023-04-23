@@ -20,7 +20,7 @@ class SliderWidget extends StatefulWidget {
         required this.card, required Function(double value) this.onSliderChanged});
 
   @override
-  _SliderWidgetState createState() => _SliderWidgetState();
+  SliderWidgetState createState() => SliderWidgetState();
 
   static String formattedTime(Duration t, {bool seconds = false}){
     if(t.inMinutes<120){
@@ -50,7 +50,7 @@ class SliderWidget extends StatefulWidget {
 
 }
 
-class _SliderWidgetState extends State<SliderWidget> {
+class SliderWidgetState extends State<SliderWidget> {
   double _slideFactor = 0;
 
   @override
@@ -60,7 +60,6 @@ class _SliderWidgetState extends State<SliderWidget> {
     if (this.widget.fullWidth) paddingFactor = .3;
 
 
-    print("Card reps: ${widget.card.repetitions}");
 
     return Column(
       children: [

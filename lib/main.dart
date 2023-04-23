@@ -1,10 +1,9 @@
 import 'dart:convert';
 
+import 'package:card_flow/capitals_deck.dart';
 import 'package:card_flow/launch_deck.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:path/path.dart';
-import 'package:sqflite/sqflite.dart';
 import 'package:zefyrka/zefyrka.dart';
 import 'package:card_flow/home_screen.dart';
 import 'card_edit_screen.dart';
@@ -25,6 +24,7 @@ void main() async {
   // print(await Data.instance.createDeck(Deck(name: "AP Calculus", dateCreated: DateTime.now())));
   //
   Deck sampleDeck = await Data.instance.createDeck(Deck(name: "Sample Deck - CardFlow & Memory", dateCreated: DateTime.now()));
+  CapitalsDeck.createDeck();
 
 
 
@@ -32,7 +32,7 @@ void main() async {
       '[{"insert":"How does CardFlow help you learn?\\n"}]','[{"insert":"CardFlow optimizes the timing of information recall using a spaced repetition algorithm"},{"insert":"\\n","attributes":{"block":"ul"}},{"insert":"This works by presenting you with flashcards at increasing intervals of time, based on how well you remember them"},{"insert":"\\n","attributes":{"block":"ul"}},{"insert":"If you recall the flashcard easily, the algorithm will wait longer before asking you to recall it again"},{"insert":"\\n","attributes":{"block":"ul"}},{"insert":"If you struggle to recall the flashcard, the algorithm will present the information to you again sooner"},{"insert":"\\n","attributes":{"block":"ul"}},{"insert":"The algorithm will adapt to your individual learning style and pace"},{"insert":"\\n","attributes":{"block":"ul"}},{"insert":"This approach helps to ensure that you spend your time and energy on the information that you need to focus on the most"},{"insert":"\\n","attributes":{"block":"ul"}}]'
   );
   Flashcard card2 = Flashcard(deckID: sampleDeck.id, '[{"insert":"Tips for creating good flashcards\\n"}]',
-  '[{"insert":"Keep it simple: use short and concise sentences/phrases—break up larger peices of information into multiple flashcards of shorter chunks"},{"insert":"\\n","attributes":{"block":"ol"}},{"insert":"Understand your cards before you try to memorize them"},{"insert":"\\n","attributes":{"block":"ol"}},{"insert":"Try using mnemonics and acronyms"},{"insert":"\\n","attributes":{"block":"ol"}}]');
+  '[{"insert":"Keep it simple: use short and concise sentences/phrases—break up larger pieces of information into multiple flashcards of shorter chunks"},{"insert":"\\n","attributes":{"block":"ol"}},{"insert":"Understand your cards before you try to memorize them"},{"insert":"\\n","attributes":{"block":"ol"}},{"insert":"Try using mnemonics and acronyms"},{"insert":"\\n","attributes":{"block":"ol"}}]');
 
   Flashcard memory = Flashcard(deckID: sampleDeck.id,
       '[{"insert":"Definition of "},{"insert":"memory","attributes":{"b":true}},{"insert":"\\n"}]',
@@ -93,12 +93,15 @@ void main() async {
     isImage: true
   );
 
+
+
   //Flashcard card1 = Flashcard(, deckID: sampleDeck.id);
   List <Flashcard> samples = [memory,card1,card2,ebbTitle,ebbYAxis, ebbXAxis, encoding, storage, retrieval, effortfulProcessing,
   shallowProcessing, hippocampus];
   for(int i =0; i<samples.length; i++){
     await Data.instance.createFlashcard(samples[i]);
   }
+
   // await Data.instance.createFlashcard(Flashcard.fromPlainText("Argentina", "Buenos Aires", deckID: southAmerica.id ));
   // await Data.instance.createFlashcard(Flashcard.fromPlainText("Bolivia", "La Paz Sucre", deckID: southAmerica.id));
   // await Data.instance.createFlashcard(Flashcard.fromPlainText("Brazil", "Brasilia", deckID: southAmerica.id));
@@ -157,39 +160,3 @@ void main() async {
 
 
 
-
-
-class EditScreen extends StatefulWidget {
-  const EditScreen({Key? key}) : super(key: key);
-
-  @override
-  _EditScreenState createState() => _EditScreenState();
-}
-
-class _EditScreenState extends State<EditScreen> {
-  ZefyrController? _controller;
-  FocusNode? _focusNode;
-
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-
-    _focusNode = FocusNode();
-    _controller = ZefyrController();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          ZefyrToolbar.basic(controller: _controller!),
-          Center(child: ZefyrEditor(controller: _controller!,))
-        ],
-      ),
-    );
-  }
-}
