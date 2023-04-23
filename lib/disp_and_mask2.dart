@@ -124,7 +124,7 @@ class _DispAndMaskState extends State<DispAndMaskScreen> {
         undoIcon: const Icon(Icons.undo),
         clearAllIcon: const Icon(Icons.clear_all_sharp),
         initialPaintMode: PaintMode.freeStyle,
-        initialStrokeWidth: 30,
+        initialStrokeWidth: 60,
         initialColor: Colors.blueAccent,
         onEdit: (){isNewEdits = true; print("NEW EDIT $isNewEdits");},
         clearedID: 0
