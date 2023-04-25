@@ -1,13 +1,15 @@
 import 'dart:math';
 
+import 'package:card_flow/about.dart';
 import 'package:card_flow/launch_deck.dart';
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:card_flow/deck_data.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:collection/collection.dart';
 
 
-
+enum MenuItem {about, licenses}
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -27,6 +29,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   int streak = 0;
   int weeksBack = 0;
   late List<int> numProgressPastWeek = [0,0,0,0,0,0,0];
+  MenuItem? selectedItem;
 
   final TextEditingController _addController = TextEditingController();
 
@@ -207,8 +210,33 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       body: Center(child:
       Column(
         children: [
+          const SizedBox(height: 40,),
+          Align(alignment: Alignment.topRight,child:
+            PopupMenuButton<MenuItem>(
+              initialValue: null,
+              onSelected: (MenuItem item) {
+                setState(() {
+                  selectedItem = item;
+                  if(selectedItem == MenuItem.about){
+                    Navigator.push(context, MaterialPageRoute(builder: (context)=> const AboutScreen()));
+                  }else if(selectedItem == MenuItem.licenses){
+                    Navigator.push(context, MaterialPageRoute(builder: (context)=>const LicensePage(applicationName: "CardFlow", applicationVersion: "1.0.0",)));
+                  }
+                });
+              },
+              icon: const Icon(Icons.info),
+              itemBuilder: (context) => <PopupMenuEntry<MenuItem>>[
+                PopupMenuItem<MenuItem>(value: MenuItem.about, child: Text("About", style: GoogleFonts.openSans(),)),
+                PopupMenuItem<MenuItem>(value: MenuItem.licenses, child: Text("Licenses", style: GoogleFonts.openSans()))
+              ],
+              // onPressed: (){
+              //
+              //   Navigator.push(context, MaterialPageRoute(builder: (context)=>const LicensePage(applicationName: "CardFlow", applicationVersion: "1.0.0",)));
+              //
+              // }
+           ),),
           const Padding(
-            padding: EdgeInsets.fromLTRB(0, 75, 0, 0),
+            padding: EdgeInsets.fromLTRB(0, 0, 0, 0),
             child: Image(image: AssetImage('assets/cflow_logo.png')),
           ),
           Padding(padding: const EdgeInsets.fromLTRB(0, 0, 0, 16), child:
@@ -244,7 +272,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               ),
               Expanded(
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  padding: const EdgeInsets.fromLTRB(0, 4, 0, 4),
                   child: GestureDetector(
                     onHorizontalDragEnd: (details){
                       int sensitivity = 3;
@@ -259,10 +287,14 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                     child:
                         AspectRatio(
                           aspectRatio: 1.6,
-                          child: Card(elevation: 0,
+                          child:
+                          // (!ListEquality().equals(numProgressPastWeek, [0,0,0,0,0,0,0]))?
+                          Card(elevation: 0,
                             shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(4)),
-                            child: _BarChart(numWeeklyProgress: numProgressPastWeek, sunday: sunday,),),
+                            child: _BarChart(numWeeklyProgress: numProgressPastWeek, sunday: sunday,),)
+                              // :Container(child: Center(child: Text("No data for this week.")),)
+                          ,
 
                         ),
                   ),
@@ -285,6 +317,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               ),
             ],
           ),
+          // Padding(
+          //   padding: const EdgeInsets.fromLTRB(32, 0, 32, 32),
+          //   child: Center(child: Text("No data yet. When you study flashcards your progress will show up here", style: GoogleFonts.openSans(fontSize: 8), textAlign: TextAlign.center,)),
+          // ),
           Expanded(
             child: Material(
                 color: Colors.white,

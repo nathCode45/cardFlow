@@ -216,8 +216,8 @@ class _LaunchDeckState extends State<LaunchDeck> {
                 Align(
                   alignment: Alignment.topLeft,
                   child: SizedBox(
-                    width: 45,
-                      height: 45,
+                    width: 70,
+                      height: 70,//45,
                       child: ClipRRect(
                           borderRadius: BorderRadius.circular(4),
                           child: Image.memory(base64Decode(cards[index].front), fit: BoxFit.cover,)) //TODO load the image in a lower resolution

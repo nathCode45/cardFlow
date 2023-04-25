@@ -134,7 +134,7 @@ class _ImageCardViewScreenState extends State<ImageCardViewScreen> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Padding(
-              padding: const EdgeInsets.all(8.0),
+              padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16),
               child: Text("Front", style: GoogleFonts.openSans(
                   fontSize: 24.0,
                   color: Colors.black)),
@@ -143,7 +143,7 @@ class _ImageCardViewScreenState extends State<ImageCardViewScreen> {
               child: cardSide(flashcard.front)
             ),
             Padding(
-              padding: const EdgeInsets.all(8.0),
+              padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16),
               child: Text("Back", style: GoogleFonts.openSans(
                   fontSize: 24.0,
                   color: Colors.black)),
