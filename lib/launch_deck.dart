@@ -28,6 +28,7 @@ class _LaunchDeckState extends State<LaunchDeck> {
   late Deck args;
   late int cardsDue;
 
+
   @override
   void initState() {
     // TODO: implement initState
@@ -99,6 +100,58 @@ class _LaunchDeckState extends State<LaunchDeck> {
   }
 
 
+  Future<void> _showRenameDeckDialog(){
+    final TextEditingController _addController = TextEditingController(text: args.name);
+
+    return showDialog<void>(
+        context: context,
+        barrierDismissible: true,
+        builder: (context){
+          return AlertDialog(
+              title: Text("Rename deck", style: GoogleFonts.openSans(),),
+              content: SingleChildScrollView(
+                child:
+                Column(
+                  children: [
+                    TextField(
+                      onChanged: (value){
+
+                      },
+                      style: GoogleFonts.openSans(),
+                      controller: _addController,
+                      decoration: const InputDecoration(hintText: "Enter deck name here"),
+                    ),
+                    TextButton(onPressed: () async {
+                      String? retrieved = _addController.text;
+
+                      if(retrieved!=""){
+                        _addController.clear();
+                        await Data.instance.updateDeck(Deck(name: retrieved, id: args.id));
+                        retrieveDeck();
+                        Navigator.of(context).pop();
+                      }else{
+                        ScaffoldMessenger.of(context)
+                            .showSnackBar(const SnackBar(content: Text('Please enter a deck name')));
+                      }
+
+
+                    }, child: Text("Update", style: GoogleFonts.openSans(),))
+                  ],
+                ),
+              )
+          );
+        }
+    );
+  }
+
+  Future retrieveDeck() async {
+    int id = args.id!;
+    args = await Data.instance.readDeck(id);
+    setState(() {
+    });
+  }
+
+
 
 
   @override
@@ -113,7 +166,10 @@ class _LaunchDeckState extends State<LaunchDeck> {
           IconButton(icon: const Icon(Icons.delete), onPressed:() async{
             _showDeleteDialog();
           }
-          )
+          ),
+          IconButton(onPressed: () async{
+            _showRenameDeckDialog();
+    }, icon: const Icon(Icons.edit))
         ],
         title: Text(
           args.name,

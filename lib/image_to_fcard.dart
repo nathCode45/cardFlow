@@ -168,23 +168,18 @@ class _ImageCardScreenState extends State<ImageCardScreen> {
 
 
 
-    return OrientationBuilder(
-      builder: (BuildContext context, Orientation orientation) {
-        return
-          Scaffold(
-            backgroundColor: Colors.black12,
-            appBar: (orientation==Orientation.portrait)?AppBar(backgroundColor: Colors.black12,):null,
-            body: (orientation==Orientation.portrait)?
-            SafeArea(
-              child: Column(
-                  children: _camChildren(true)
-              ),
-            ):SafeArea(child: Row(
-                children: _camChildren(false)
-            )),
-          );
-      },
-    );
+
+      return
+        Scaffold(
+          backgroundColor: Colors.black12,
+          appBar: AppBar(backgroundColor: Colors.black12,),
+          body:
+          SafeArea(
+            child: Column(
+                children: _camChildren(true)
+            ),
+          )
+        );
 
 
   }

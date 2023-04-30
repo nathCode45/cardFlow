@@ -257,7 +257,15 @@ class Data{
     final dbPath = await getDatabasesPath();
     final path = join(dbPath, filePath);
 
-    return await openDatabase(path, version: 1, onCreate: _createDB);
+    Database db = await openDatabase(path, version: 1, onCreate: _createDB);
+
+    await Data.instance.createDeck(Deck(name:"Spanish Weekly Vocabulary", dateCreated: DateTime.now()));
+    await Data.instance.createDeck(Deck(name: "Trigonometry Practice Problems", dateCreated: DateTime.now()));
+    await Data.instance.createDeck(Deck(name: "Cardiovascular System and Heart Structure", dateCreated: DateTime.now()));
+    await Data.instance.createDeck(Deck(name: "Physics: Conservation of Energy", dateCreated: DateTime.now()));
+    await Data.instance.createDeck(Deck(name: "World History: 1200-1500", dateCreated: DateTime.now()));
+
+    return db;
 
   }
 
@@ -353,9 +361,9 @@ class Data{
 
     if(maps.isNotEmpty){
       return Deck(
-          id: maps[id]['id'],
-          name: maps[id]['name'],
-          dateCreated: maps[id]['dateCreated']
+          id: maps[0]['id'],
+          name: maps[0]['name'],
+          dateCreated: maps[0]['dateCreated']
       );
     }else{
       throw Exception('ID $id is not found');
@@ -393,6 +401,11 @@ class Data{
     final db = await instance.database;
 
     await db.update('flashcards', flashcard.toMap(), where: 'id = ?', whereArgs: [flashcard.id]);
+  }
+
+  Future<void> updateDeck(Deck deck) async{
+    final db = await instance.database;
+    await db.update('decks', deck.toMap(), where: 'id = ?', whereArgs: [deck.id]);
   }
 
 
