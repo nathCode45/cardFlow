@@ -105,9 +105,9 @@ class _CardEditState extends State<CardEdit> {
       barrierDismissible: false,
       builder: (BuildContext context){
         return AlertDialog(
-          title: const Text("Are you sure you want to delete this card?"),
-          content: const SingleChildScrollView(
-              child: Text("This action cannot be undone.")
+          title: Text("Are you sure you want to delete this card?", style: GoogleFonts.openSans(),),
+          content: SingleChildScrollView(
+              child: Text("This action cannot be undone.", style: GoogleFonts.openSans(),)
           ),
           actions: [
             TextButton(
@@ -128,6 +128,41 @@ class _CardEditState extends State<CardEdit> {
         );
       }
     );
+  }
+
+  Future<void> _showCopyAndOverrideDialog(){
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context){
+        return AlertDialog(
+          title: Text("If you copy from the front you will lose your current document on the back. Are you sure you want to proceed?", style: GoogleFonts.openSans(),),
+          content: SingleChildScrollView(
+              child: Text("This action cannot be undone.", style: GoogleFonts.openSans(),)
+          ),
+          actions: [
+            TextButton(
+                autofocus: true,
+                onPressed: (){
+                  Navigator.of(context).pop();
+                }, child: const Text("NO", style: TextStyle(fontWeight: FontWeight.bold),)),
+            TextButton(onPressed: (){
+              _copyFrontToBack();
+              Navigator.of(context).pop();
+            }, child: const Text("YES")),
+
+
+          ],
+        );
+      }
+    );
+  }
+
+  void _copyFrontToBack(){
+   setState(() {
+     NotusDocument? gatheredDocument = NotusDocument.fromDelta(_controller!.document.toDelta());
+     _controller2 = ZefyrController(gatheredDocument);
+   });
   }
 
 
@@ -209,7 +244,22 @@ class _CardEditState extends State<CardEdit> {
                       ),
                   ))),
                 ),
-                const SizedBox(height: 50,),
+                const SizedBox(height: 20,),
+                Center(
+                  child: TextButton.icon(onPressed: (){
+
+                    if(_controller?.document!=null){
+                      if(_controller2?.document.toString()=="¶  ⏎"){ //checks if the back is empty
+                        _copyFrontToBack();
+                      }else{
+                        _showCopyAndOverrideDialog();
+                      }
+                    }
+
+                  }, icon: Icon(Icons.copy),
+                  label: Text(style: GoogleFonts.openSans(), "Copy Front to Back")),
+                ),
+                const SizedBox(height: 20,),
                 Text("Back", style: GoogleFonts.openSans(
                     fontSize: 20.0,)),
                 Padding(
@@ -292,7 +342,7 @@ class _CardEditState extends State<CardEdit> {
       //print("$contents\n$contents2");
       args.card.deckID = args.selectedDeckID;
       await Data.instance.updateFlashcard(args.card);
-      //print(args.card);
+
     }
 
     if(mounted){

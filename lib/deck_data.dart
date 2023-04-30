@@ -248,6 +248,7 @@ class Data{
     }
     _database = await _initDB(FILE_NAME);
 
+
     return _database!;
 
 
@@ -258,12 +259,6 @@ class Data{
     final path = join(dbPath, filePath);
 
     Database db = await openDatabase(path, version: 1, onCreate: _createDB);
-
-    await Data.instance.createDeck(Deck(name:"Spanish Weekly Vocabulary", dateCreated: DateTime.now()));
-    await Data.instance.createDeck(Deck(name: "Trigonometry Practice Problems", dateCreated: DateTime.now()));
-    await Data.instance.createDeck(Deck(name: "Cardiovascular System and Heart Structure", dateCreated: DateTime.now()));
-    await Data.instance.createDeck(Deck(name: "Physics: Conservation of Energy", dateCreated: DateTime.now()));
-    await Data.instance.createDeck(Deck(name: "World History: 1200-1500", dateCreated: DateTime.now()));
 
     return db;
 
@@ -276,6 +271,12 @@ class Data{
     db.execute('CREATE TABLE decks(id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, date_created TEXT)');
     db.execute('CREATE TABLE flashcards(id INTEGER PRIMARY KEY AUTOINCREMENT, deckID INTEGER, front TEXT, back TEXT, formattedRevDate TEXT, repetitions INTEGER, eFactor INTEGER, isImage BIT)');
     db.execute('CREATE TABLE progress(id INTEGER PRIMARY KEY AUTOINCREMENT, formattedDateTime TEXT, deckID INTEGER)');
+    // await Data.instance.createDeck(Deck(name:"Spanish Weekly Vocabulary", dateCreated: DateTime.now()));
+    // await Data.instance.createDeck(Deck(name: "Trigonometry Practice Problems", dateCreated: DateTime.now()));
+    // await Data.instance.createDeck(Deck(name: "Cardiovascular System and Heart Structure", dateCreated: DateTime.now()));
+    // await Data.instance.createDeck(Deck(name: "Physics: Conservation of Energy", dateCreated: DateTime.now()));
+    // await Data.instance.createDeck(Deck(name: "World History: 1200-1500", dateCreated: DateTime.now()));
+    // print("CALLED");
   }
 
 
