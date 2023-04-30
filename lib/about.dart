@@ -13,7 +13,7 @@ class AboutScreen extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(style: GoogleFonts.openSans(),"CardFlow is an app that allows users to create and study flashcards. Users can create flashcards either through a rich text editor or by taking a picture of handwritten notes and masking out parts of the picture to occlude in the flashcard. Cards are studied using a spaced repetition schedule based on user feedback given through a slider scale after each repetition. This creates a more personalized and efficient study experience. "),
+            Text(style: GoogleFonts.openSans(),"CardFlow is an app that allows users to create and study flashcards. Users can create flashcards either through a rich text editor with both front/back and fill-in-the-blank options or by taking a picture of handwritten notes and masking out parts of the picture to occlude in the flashcard. Cards are studied using a spaced repetition schedule based on user feedback given through a slider scale after each repetition. This creates a more personalized and efficient study experience. "),
             const SizedBox(height: 8,),
             Text(style: GoogleFonts.openSans(), "You can contact the developer at cardflowdeveloper@gmail.com")
           ],
