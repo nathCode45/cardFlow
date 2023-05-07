@@ -248,7 +248,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             mainAxisSize: MainAxisSize.max,
             children: [
               Expanded(child: Center(
-                child: Text("${months[sunday.month-1]} ${sunday.day} - ${sunday.add(const Duration(days: 6)).day}",
+                child: Text("${months[sunday.month-1]} ${sunday.day} - ${sunday.add(const Duration(days: 6)).day<=6 ? months[sunday.add(const Duration(days: 6)).month-1]:''} ${sunday.add(const Duration(days: 6)).day}",
                 style: GoogleFonts.openSans(fontSize: 16),),
               )),
             ],

@@ -78,26 +78,26 @@ class _LearnState extends State<Learn> {
             //print("j: ${_shorten(cards[j].front)} repetitions: ${cards[j].repetitions} nextReview: ${cards[j].nextReview}");
             //print('nearest: ${_shorten(cards[nearest].front)} repetitions: ${cards[nearest].repetitions} nextReview: ${cards[nearest].nextReview}');
 
-            if(!dueListIDs.contains(cards[nearest].id)  && !cards[nearest].nextReview.isBefore(DateTime.now().add(skipBuffer).add(const Duration(minutes: 1)))){ //if the nearest is not even due within a minute
+            if(!dueListIDs.contains(cards[nearest].id)  && !cards[nearest].nextReview.isBefore(DateTime.now().add(skipBuffer).add(const Duration(seconds: 2)))){ //if the nearest is not even due within a minute
               nearest = j; //because j is due
-              //print("Nearest is not due!");
+              print("Nearest is not due!");
             } else if(cards[nearest].repetitions==1){ //if the nearest card so far has not been reviewed at all
               if(cards[j].repetitions>1){ // if cards j has been reviewed
                 nearest = j;
-                //print("Nearest has no repetitions but this one has some!");
+                print("Nearest has no repetitions but this one has some!");
               }else if(cards[j].nextReview.isBefore(cards[nearest].nextReview)){ //cards j has no repititons and neither does the nearest card but cards j is nearer than current nearest
                 nearest = j;
-                //print("Neither this card nor the nearest has repetitions but this one comes sooner!");
+                print("Neither this card nor the nearest has repetitions but this one comes sooner!");
               }
             }else if(cards[j].repetitions>1){
               if(cards[j].nextReview.difference(DateTime.now().add(skipBuffer)).abs()< cards[nearest].nextReview.difference(DateTime.now().add(skipBuffer)).abs()){
                 nearest = j;
-                //print("The nearest is due, has been reviewed, but this one has also been reviewed and comes closer to now +buffer!");
+                print("The nearest is due, has been reviewed, but this one has also been reviewed and comes closer to now +buffer!");
               }
             }else{
               if(cards[j].nextReview.difference(DateTime.now().add(skipBuffer).add(Deck.RECENCY_BUFFER)).abs()< cards[nearest].nextReview.difference(DateTime.now().add(skipBuffer)).abs()){
                 nearest = j;
-                //print("The nearest is due, has been reviewed, but this one has not been reviewed and comes closer to now + buffer + 1 minute!");
+                print("The nearest is due, has been reviewed, but this one has not been reviewed and comes closer to now + buffer + 1 minute!");
               }
             }
           }
