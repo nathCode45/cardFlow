@@ -411,7 +411,7 @@ class _BarChart extends StatelessWidget {
             titlesData: titlesData,
             barGroups: barGroups,
             gridData: FlGridData(show: true, horizontalInterval: 5, verticalInterval: 10),
-            maxY: numWeeklyProgress.reduce(max).toDouble()+5-(numWeeklyProgress.reduce(max).toDouble()%5),
+            maxY: numWeeklyProgress.reduce(max).toDouble()+10-(numWeeklyProgress.reduce(max).toDouble()%5),
         )
     );
 
@@ -433,7 +433,19 @@ class _BarChart extends StatelessWidget {
     );
 
     String text;
-    String date = "\n${sunday.day +value.toInt()}";
+    DateTime added = sunday.add(Duration(days: value.toInt()));
+    // if(added>sunday.day){
+    //   added = added - sunday.day;
+    // }
+
+    // Map<String, int> daysInMonth = {
+    //   "January": 31,
+    //   "February": (DateTime.now().year%4==0)? 29:28,
+    //   "March": 31,
+    //   "April": 30
+    // }
+
+    String date = "\n${added.day}";
 
     switch(value.toInt()){
       case 0:
@@ -486,7 +498,7 @@ class _BarChart extends StatelessWidget {
               getTitlesWidget: getTitles
           )
       ),
-      leftTitles: AxisTitles(sideTitles: SideTitles(showTitles: true, reservedSize: 30)),
+      leftTitles: AxisTitles(sideTitles: SideTitles(showTitles: true, reservedSize: 35)),
       rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
       topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false))
   );

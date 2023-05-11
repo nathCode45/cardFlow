@@ -40,10 +40,14 @@ void main() async {
 
 
   if(first!=null && first){ // check that this is the first time the app has been opened
+
+    ///----FOR CLEARING DATA *KEEP COMMENTED OUT*
     // Data.instance.deleteDatabase();
     // await Data.instance.deleteAllDecks();
     // await Data.instance.deleteAllFlashcards();
     // await Data.instance.deleteAllProgress();
+    ///------
+
 
     ///----FOR PROMO SCREENSHOTS------
     // await Data.instance.createDeck(Deck(name:"Spanish Weekly Vocabulary", dateCreated: DateTime.now()));
@@ -135,34 +139,38 @@ void main() async {
     for(int i =0; i<samples.length; i++){
       await Data.instance.createFlashcard(samples[i]);
     }
-
+    ///---------------------///
 
 
     ///---------SAMPLE PROGRESS REPS-----///
-    for(int i =0; i<3; i++){
-      await Data.instance.createProgressRep(ProgressRep(dateTime: DateTime(2023, 4, 6), deckID: 0));
-    }
-    for(int i =0; i<2; i++){
-      await Data.instance.createProgressRep(ProgressRep(dateTime: DateTime(2023, 4, 4), deckID: 0));
-    }
-    for(int i =0; i<6; i++){
-      await Data.instance.createProgressRep(ProgressRep(dateTime: DateTime(2023, 4, 7), deckID: 0));
-    }
-    for(int i =0; i<3; i++){
-      await Data.instance.createProgressRep(ProgressRep(dateTime: DateTime(2023, 3, 28), deckID: 0));
-    }
-    for(int i =0; i<8; i++){
-      await Data.instance.createProgressRep(ProgressRep(dateTime: DateTime(2023, 4, 10), deckID: 0));
-    }
-
-    for(int i =0; i<3; i++){
-      await Data.instance.createProgressRep(ProgressRep(dateTime: DateTime(2023, 4, 9), deckID: 0));
-    }
-
-    for(int i =0; i<18; i++){
-      await Data.instance.createProgressRep(ProgressRep(dateTime: DateTime(2023, 4, 8), deckID: 0));
-    }
+    // for(int i =0; i<10; i++){
+    //   await Data.instance.createProgressRep(ProgressRep(dateTime: DateTime(2023, 5, 7), deckID: 0));
+    // }
+    // for(int i =0; i<23; i++){
+    //   await Data.instance.createProgressRep(ProgressRep(dateTime: DateTime(2023, 5, 8), deckID: 0));
+    // }
+    // for(int i =0; i<54; i++){
+    //   await Data.instance.createProgressRep(ProgressRep(dateTime: DateTime(2023, 5, 9), deckID: 0));
+    // }
+    // for(int i =0; i<0; i++){
+    //   await Data.instance.createProgressRep(ProgressRep(dateTime: DateTime(2023, 5, 10), deckID: 0));
+    // }
+    // for(int i =0; i<48; i++){
+    //   await Data.instance.createProgressRep(ProgressRep(dateTime: DateTime(2023, 5, 11), deckID: 0));
+    // }
+    //
+    // for(int i =0; i<38; i++){
+    //   await Data.instance.createProgressRep(ProgressRep(dateTime: DateTime(2023, 5, 12), deckID: 0));
+    // }
+    //
+    // for(int i =0; i<51; i++){
+    //   await Data.instance.createProgressRep(ProgressRep(dateTime: DateTime(2023, 5, 13), deckID: 0));
+    // }
 ///----------------------
+    ///
+    ///
+    ///
+    ///
     ///
     /// KEEP THIS RESET LINE BELOW
     await resetFirst();
