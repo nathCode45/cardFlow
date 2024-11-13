@@ -1,16 +1,8 @@
-# card_flow
+# CardFlow - Smart Flashcards
+iOS app developed by Nathaniel Corey using the Flutter SDK
+https://apps.apple.com/lt/app/cardflow-smart-flashcards/id6448393361
 
-A new Flutter project.
+CardFlow is an app that allows users to create and study flashcards. Users can create flashcards either through a rich text editor with both front/back and fill-in-the-blank options or by taking a picture of handwritten notes and masking out parts of the picture to occlude in the flashcard. Cards can be studied using a spaced repetition schedule based on user feedback given through a slider scale after each repetition. This creates a more personalized and efficient study experience.
 
-## Getting Started
 
-This project is a starting point for a Flutter application.
 
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
